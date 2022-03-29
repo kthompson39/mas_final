@@ -34,9 +34,9 @@ int main(int argc, char *argv[]){
     genColors(map, none_toggle); //Add colors and text to all tile types
 
     addDoor(map); //Add doors to rooms and add hallways between doors of different rooms
-    genWalls(map);
     genRiver(map);
-    
+    genWalls(map);
+
     none_toggle = true;
     genColors(map, none_toggle); //Update the new tiles with colors again
     px = map.rooms[0].lowerx-2; //Set user to coordinates of room[0]
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]){
                     if (new_l > map.discovered[y][x])
                         map.discovered[y][x] = new_l;
                 }
-
+                
                 //Refresh Display Tile
                 float v = map.discovered[y][x];
 
