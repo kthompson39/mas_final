@@ -9,11 +9,17 @@ void genRandom(Map& map){
             map.word[y][x] = "  ";
             map.discovered[y][x] = 0.2;
 
+            if (y <= 7){ //Top left corner becomes grass
+                if (x <  5) map.tiles[y][x] = Grass;
+                if (x == 5) map.tiles[y][x] = Wall;
+                if (x <= 5 && y == 7) map.tiles[y][x] = Wall;
+            }
+
             int a = rand()%1; 
             int w = rand()%7+5;
             int h = rand()%7+5;
             //w = 6; h =6; //Uncomment for very uniform rooms
-            if (a == 0 && y > h+2 && x > w+2 && x < sizex-2 && y < sizey-2){ //Do not create room too close to edge of area
+            if (a == 0 && y > h+2 && x > w+5 && x < sizex-2 && y < sizey-2){ //Do not create room too close to edge of area
                 bool c = true;
 
                 //Check the new room is not overlapping another room
@@ -23,7 +29,6 @@ void genRandom(Map& map){
                            map.tiles[y - y2][x - x2 + 2] == Floor){
                             c = false;
                         }
-                    
                     }
                 }
 
@@ -73,12 +78,10 @@ void Dij(Map& map, int y, int x, enum category find, enum category change){
                 int point = mm;
                 point = leaves[point].parent; //Do not change the final destination tile
                 while(1){
-                    // cout << point << endl; getch();
                     int yy = leaves[point].L;
                     int xx = leaves[point].R;
                     map.tiles[yy][xx] = change;
                     map.word[yy][xx] = "  ";
-                    // px = xx; py = yy;
                     point = leaves[point].parent;
                     if (point == -1) break;
                 }

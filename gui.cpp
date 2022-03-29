@@ -95,6 +95,10 @@ void genColors(Map& map, bool none_toggle){
                 map.blocks[y][x] = none_toggle; //Blocks is TRUE after generating Hallways
                 map.word[y][x] = "  ";
                 rgb(map, y,x, 0,0,0, 0,0,0);
+                if (surroundingTilesAdj(map, y,x,Hallway)){
+                    map.word[y][x] = "##";
+                    rgb(map, y,x, 100,0,0, 0,0,0);
+                }
             }
             if (map.tiles[y][x] == Grass){ 
                 int r = rand() % 15;
@@ -104,7 +108,7 @@ void genColors(Map& map, bool none_toggle){
                 if (r == 2) map.word[y][x] = "' ";
                 if (r == 3) map.word[y][x] = ", "; 
                 rgb(map, y,x, 100-f, 255-rand() % 100-f, 100-f,   1, rand() % 25+75-f, 1);
-                //rgb(y,x, 0,0,0,  0,0,0);
+
             }else if (map.tiles[y][x] == Floor){ 
                 map.word[y][x] = "  "; 
                 map.blocks[y][x] = 0;
@@ -114,7 +118,7 @@ void genColors(Map& map, bool none_toggle){
             else if (map.tiles[y][x] == Hallway){ 
                 map.word[y][x] = "##"; 
                 map.blocks[y][x] = 0;
-                int s = rand()%15; //35+100;
+                int s = rand()%15;
                 rgb(map, y,x, 150,150,150,  60-s,60-s,60-s);
             }
             else if (map.tiles[y][x] == Wall){ 
@@ -132,20 +136,50 @@ void genColors(Map& map, bool none_toggle){
                 }else{
                     rgb(map, y,x, 200,200,200,   1, rand() % 25+75-f, 1);
                 }
+            } else if (map.tiles[y][x] == River){ 
+                int r = rand() % 10;
+                map.blocks[y][x] = 0;
+                map.word[y][x] = "  ";
+                if (r == 0) map.word[y][x] = " ^";
+                if (r == 1) map.word[y][x] = "^ ";
+                if (r == 2) map.word[y][x] = " ~";
+                if (r == 3) map.word[y][x] = "~ "; 
+                rgb(map, y,x, 50,50, 255-rand() % 10,   0,0,rand() % 25+150-f);
+
             }
+
 
         }
     }
 }
 
-//Just used for make walls appear
+//Just used for make walls appear near other tile types (i.e. Floor and Hallway)
 void genWalls(Map& map){
     for (int y = 0; y < sizey; y++) {
         for (int x = 0; x < sizex; x++) {
-            if (map.tiles[y][x] == Floor){ 
-                if (surroundingTilesAdj(map,y,x,0)){
+            if (map.tiles[y][x] == Floor){ //Add walls on floors that are nearby None
+                if (surroundingTilesAdj(map,y,x,None)){
                     map.tiles[y][x] = Wall;
                 }
+            }
+        }
+    }
+}
+
+void genRiver(Map& map){
+    int skip = 0;
+    int shift = rand()%15-7;
+    if (shift == 0) shift = 1;
+    for (int y = 0; y < sizey; y++) {
+        for (int x = 0; x < sizex; x++) {
+            int ys = (y/shift)-(sizey/2/shift)-3;
+            if (x <= sizex/2-ys+3 && x >= sizex/2-ys){
+
+                if (map.tiles[y][x] == None)
+                    map.tiles[y][x] = River; 
+                int s = rand()%16;
+                skip++;
+
             }
         }
     }
@@ -183,7 +217,7 @@ float calcLighting(Map& map, int posx, int posy, int x, int y, float brightness)
         c = sqrt(c);
         if (c >= 1) c*=2;
         return 1;
-        // return c;
+        // return c; //Return c instead for distance based brightness
     }
     return 0;
 }
@@ -214,7 +248,7 @@ void addDoor(Map& map){
             map.tiles[sy+1][sx] = Hallway;
         }
         
-        Dij(map, sy,sx, Door, Hallway); //y,x start, find Road, Change to Road along path
+        Dij(map, sy,sx, Door, Hallway); //y,x start, find Road, Change to Hallway along shortest path
         map.tiles[sy][sx] = Door;
         map.blocks[sy][sx] = 0;
         map.rooms[i].doorx = sx;
@@ -222,12 +256,16 @@ void addDoor(Map& map){
         
     }
 
-    //Make room of index 0 appear outdoorsy
-    for (int x = 0; x < map.rooms[0].room_w; x++){
-        for (int y = 0; y < map.rooms[0].room_h; y++){
-            if (map.tiles[map.rooms[0].lowery - y][map.rooms[0].lowerx - x] != Door)
-                map.tiles[map.rooms[0].lowery - y][map.rooms[0].lowerx - x] = Grass;
-        }
-    }
+    //Make room of index 0 be different
+    // for (int x = 0; x < map.rooms[0].room_w; x++){
+        // for (int y = 0; y < map.rooms[0].room_h; y++){
+            // if (map.tiles[map.rooms[0].lowery - y][map.rooms[0].lowerx - x] != Door)
+                // map.tiles[map.rooms[0].lowery - y][map.rooms[0].lowerx - x] = Grass;
+        // }
+    // }
+
+    int a = rand()%4+1; //Adds door near grass
+    Dij(map, 7,a,Door,Hallway);
+    map.tiles[7][a] = Door;
 
 }

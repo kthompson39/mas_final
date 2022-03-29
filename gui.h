@@ -45,3 +45,5 @@ float calcLighting(Map& m, int posx, int posy, int x, int y, float brightness);
 
 void addDoor(Map& map);
 
+void genRiver(Map& map);
+

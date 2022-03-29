@@ -7,7 +7,7 @@
 
 using namespace std;
 
-enum category{None, Grass, Wall, Floor, Hallway, Door};
+enum category{None, Grass, Wall, Floor, Hallway, Door, River};
 
 const int sizex = 32; //Size of map
 const int sizey = 32;
