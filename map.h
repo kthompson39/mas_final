@@ -4,16 +4,18 @@
 #include <vector>
 
 #include "room.h"
+#include "definitions.h"
 
 using namespace std;
-
-enum category{None, Grass, Wall, Floor, Hallway, Door, River};
 
 const int sizex = 32; //Size of map
 const int sizey = 32;
 
 class Map {
   public:
+    Map();
+    Map(const Map&);
+
     enum category tiles[sizey][sizex];
     string word[sizey][sizex];
     int f_r[sizey][sizex]; //foreground_red

@@ -1,8 +1,8 @@
-OBJS = mas.cpp gui.cpp util.cpp
+OBJS = mas.cpp gui.cpp util.cpp map.cpp agent.cpp
 
 CC = g++
 
-COMPILER_FLAGS = -w
+COMPILER_FLAGS = -w -g
 
 LINKER_FLAGS = -lncursesw
 

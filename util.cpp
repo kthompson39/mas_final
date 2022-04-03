@@ -1,4 +1,6 @@
 #include "util.h"
+#include "definitions.h"
+#include <algorithm>
 
 //Generate random rooms and also push new room struct to "rooms" vector
 void genRandom(Map& map){
@@ -164,5 +166,84 @@ void Dij(Map& map, int y, int x, enum category find, enum category change){
             map.extra[j][i] = 0;
         }
     } 
+}
+
+
+void removeDirection(std::vector<Direction>& vec, Direction d)
+{
+    vec.erase(std::remove(vec.begin(), vec.end(), d), vec.end());
+}
+
+bool isTileOccupiable(int x, int y, Map& map)
+{
+    if(x < 0 || x > sizex)
+    {
+        return false;
+    }
+    if(y < 0 || y > sizey)
+    {
+        return false;
+    }
+
+    if(map.tiles[y][x] == Grass ||
+       map.tiles[y][x] == Floor || 
+       map.tiles[y][x] == Hallway || 
+       map.tiles[y][x] == Door)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+vector<Direction> getMovementDirections(int x, int y, Map& map)
+{
+    std::vector<Direction> possible_directions{
+        STAY
+    };
+
+    if(isTileOccupiable(x-1,y,map))
+        possible_directions.push_back(LEFT);
+    if(isTileOccupiable(x+1,y,map))
+        possible_directions.push_back(RIGHT);
+    if(isTileOccupiable(x,y-1,map))
+        possible_directions.push_back(UP);
+    if(isTileOccupiable(x,y+1,map))
+        possible_directions.push_back(DOWN);
+    if(isTileOccupiable(x-1,y-1,map))
+        possible_directions.push_back(UP_LEFT);
+    if(isTileOccupiable(x+1,y-1,map))
+        possible_directions.push_back(UP_RIGHT);
+    if(isTileOccupiable(x-1,y+1,map))
+        possible_directions.push_back(DOWN_LEFT);
+    if(isTileOccupiable(x+1,y+1,map)) 
+        possible_directions.push_back(DOWN_RIGHT);
+
+    return possible_directions;
+}
+
+std::vector<Agent> createAgents(int numAgents, int startX, int startY, Map& map)
+{
+    std::vector<Agent> agents;
+    for(int i = 0; i < numAgents; i++)
+    {
+        agents.push_back(Agent(startX,startY, numAgents, map));
+    }
+
+    return agents;
+}
+
+int isAgentOnTile(int x, int y, std::vector<Agent>& agents, Map& map)
+{
+    for(size_t i = 0; i < agents.size(); i++)
+    {
+        if(agents[i].m_x == x && agents[i].m_y == y)
+        {
+            return i;
+        }
+    }
+    return -1;
 }
 

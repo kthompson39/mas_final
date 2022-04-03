@@ -1,5 +1,8 @@
+#include <vector>
+#include <string>
 #include "gui.h"
 #include "util.h"
+#include "agent.h"
 
 using namespace std;
 
@@ -11,7 +14,6 @@ int camy = py;
 int ch; //Global char input
 int turns = 0;
 bool none_toggle = false;
-
 
 
 int main(int argc, char *argv[]){
@@ -29,6 +31,8 @@ int main(int argc, char *argv[]){
 
     Map map;
 
+    auto agents = createAgents(5, 2,2, map);
+
     genRandom(map); //Generate the rooms (do not have walls yet)
     genWalls(map);  //Add walls around the rooms
     genColors(map, none_toggle); //Add colors and text to all tile types
@@ -39,15 +43,23 @@ int main(int argc, char *argv[]){
 
     none_toggle = true;
     genColors(map, none_toggle); //Update the new tiles with colors again
-    px = map.rooms[0].lowerx-2; //Set user to coordinates of room[0]
-    py = map.rooms[0].lowery-2;
+    //px = map.rooms[0].lowerx-2; //Set user to coordinates of room[0]
+    //py = map.rooms[0].lowery-2;
 
-    px = 2; //To top left corner
-    py = 2;
+    //px = 2; //To top left corner
+    //py = 2;
 
     while(1){
 
         turns++;
+
+        //int oldx = agents[0].m_x; 
+        //int oldy = agents[0].m_y;
+
+        for (Agent& agent: agents)
+        {
+            agent.step(agents, map);
+        }
 
         for (int j = 0; j < LINES; j++){
             for (int i = 0; i < COLS / 2; i++){
@@ -66,10 +78,16 @@ int main(int argc, char *argv[]){
                 
                 //Refresh Display Tile
                 float v = map.discovered[y][x];
+                int agentOnTile = isAgentOnTile(x, y, agents, map);
 
                 if (x == px && y == py){ //Display Player
                     printT(i*2,j, "Al" ,255,255,1,  200,200,1);
-                }else{ //Display Tile
+                }
+                else if(agentOnTile > -1)
+                {
+                    printT(i*2,j, std::to_string(agentOnTile) ,255,255,1,  200,200,1);
+                }
+                else{ //Display Tile
                     printT(i*2,j, 
                         map.word[y][x] ,
                         map.f_r[y][x]*v, 
@@ -83,9 +101,9 @@ int main(int argc, char *argv[]){
         }
         
         ch = getch();
-
-        int oldx = px; 
+        int oldx = px;
         int oldy = py;
+
         if (ch == 68){ //Left
             px--;
         }
