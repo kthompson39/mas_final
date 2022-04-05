@@ -31,7 +31,6 @@ int main(int argc, char *argv[]){
 
     Map map;
 
-    auto agents = createAgents(5, 2,2, map);
 
     genRandom(map); //Generate the rooms (do not have walls yet)
     genWalls(map);  //Add walls around the rooms
@@ -46,15 +45,14 @@ int main(int argc, char *argv[]){
     //px = map.rooms[0].lowerx-2; //Set user to coordinates of room[0]
     //py = map.rooms[0].lowery-2;
 
+    auto agents = createAgents(5, 2,2, map);
+
     //px = 2; //To top left corner
     //py = 2;
 
     while(1){
 
         turns++;
-
-        //int oldx = agents[0].m_x; 
-        //int oldy = agents[0].m_y;
 
         for (Agent& agent: agents)
         {
@@ -85,7 +83,8 @@ int main(int argc, char *argv[]){
                 }
                 else if(agentOnTile > -1)
                 {
-                    printT(i*2,j, std::to_string(agentOnTile) ,255,255,1,  200,200,1);
+                    std::string agent_name = std::to_string(agentOnTile) + " ";
+                    printT(i*2,j, agent_name ,0,0,0,  200,200,1);
                 }
                 else{ //Display Tile
                     printT(i*2,j, 
@@ -103,6 +102,8 @@ int main(int argc, char *argv[]){
         ch = getch();
         int oldx = px;
         int oldy = py;
+        //oldx = agents[0].m_x; 
+        //oldy = agents[0].m_y;
 
         if (ch == 68){ //Left
             px--;

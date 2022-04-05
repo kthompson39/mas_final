@@ -97,7 +97,7 @@ void genColors(Map& map, bool none_toggle){
                 rgb(map, y,x, 0,0,0, 0,0,0);
                 if (surroundingTilesAdj(map, y,x,Hallway) || surroundingTilesAdj(map, y,x,River)){
                     map.word[y][x] = "##";
-                    rgb(map, y,x, 112*.6,103*.6,48*.6, 0,0,0);
+                    rgb(map, y,x, 122,103,58, 0,0,0);
                 }
             }
             if (map.tiles[y][x] == Grass){ 
