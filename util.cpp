@@ -13,8 +13,8 @@ void genRandom(Map& map){
 
             if (y <= 7){ //Top left corner becomes grass
                 if (x <  5) map.tiles[y][x] = Grass;
-                if (x == 5) map.tiles[y][x] = Wall;
-                if (x <= 5 && y == 7) map.tiles[y][x] = Wall;
+                if (x == 5) map.tiles[y][x] = None;
+                if (x <= 5 && y == 7) map.tiles[y][x] = None;
             }
 
             int a = rand()%1; 

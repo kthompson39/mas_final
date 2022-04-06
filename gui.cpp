@@ -95,7 +95,7 @@ void genColors(Map& map, bool none_toggle){
                 map.blocks[y][x] = none_toggle; //Blocks is TRUE after generating Hallways
                 map.word[y][x] = "  ";
                 rgb(map, y,x, 0,0,0, 0,0,0);
-                if (surroundingTilesAdj(map, y,x,Hallway) || surroundingTilesAdj(map, y,x,River)){
+                if (surroundingTilesAdj(map, y,x,Hallway) || surroundingTilesAdj(map, y,x,River)  || surroundingTilesAdj(map, y,x,Grass)){
                     map.word[y][x] = "##";
                     rgb(map, y,x, 122,103,58, 0,0,0);
                 }
@@ -268,6 +268,6 @@ void addDoor(Map& map){
 
     int a = rand()%4+1; //Adds door near grass
     Dij(map, 7,a,Door,Hallway);
-    map.tiles[7][a] = Door;
+    // map.tiles[7][a] = Door;
 
 }
