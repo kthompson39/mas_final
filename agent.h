@@ -11,15 +11,18 @@ public:
     int updateInternalMap(Map& fullMap);
     void step(std::vector<Agent>& agents, Map& fullMap);
     void moveDirection(Direction d);
+    int BFS_to_Undiscovered(int, int);
     
-    int m_x;
-    int m_y;
+    int m_x = -1;
+    int m_y = -1;
     int m_treasureCount;
     std::vector<int> m_likableness;
 
-    int m_goalX;
-    int m_goalY;
+    int m_goalX = -1;
+    int m_goalY = -1;
 
     Map m_map;
     Map& m_global_map;
+
+    bool m_aimless = false;
 };

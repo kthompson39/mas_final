@@ -18,3 +18,5 @@ std::vector<Agent> createAgents(int numAgents, int startX, int startY, Map& map)
 
 int isAgentOnTile(int x, int y, std::vector<Agent>& agents, Map& map);
 
+bool isTileOccupiable(int x, int y, Map& map);
+

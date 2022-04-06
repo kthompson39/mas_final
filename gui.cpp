@@ -137,13 +137,15 @@ void genColors(Map& map, bool none_toggle){
                     rgb(map, y,x, 200,200,200,   1, rand() % 25+75-f, 1);
                 }
             } else if (map.tiles[y][x] == River){ 
-                int r = rand() % 10;
+                int r = rand() % 8;
                 map.blocks[y][x] = 0;
                 map.word[y][x] = "  ";
-                if (r == 0) map.word[y][x] = " ^";
-                if (r == 1) map.word[y][x] = "^ ";
-                if (r == 2) map.word[y][x] = " ~";
-                if (r == 3) map.word[y][x] = "~ "; 
+                if (r == 0) map.word[y][x] = "≈≈";
+                if (r == 1) map.word[y][x] = "≈ ";
+                if (r == 2) map.word[y][x] = " ≈";
+                if (r == 3) map.word[y][x] = " ~";
+                if (r == 4) map.word[y][x] = "~ "; 
+                if (r == 5) map.word[y][x] = "~~"; 
                 rgb(map, y,x, 50,50, 255-rand() % 10,   0,0,rand() % 25+150-f);
 
             }

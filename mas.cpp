@@ -47,9 +47,6 @@ int main(int argc, char *argv[]){
 
     auto agents = createAgents(5, 2,2, map);
 
-    //px = 2; //To top left corner
-    //py = 2;
-
     while(1){
 
         turns++;
