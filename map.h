@@ -8,8 +8,8 @@
 
 using namespace std;
 
-const int sizex = 64; //Size of map
-const int sizey = 64;
+const int sizex = 48; //Size of map
+const int sizey = 48;
 
 class Map {
   public:

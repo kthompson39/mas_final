@@ -179,6 +179,9 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                     }
                 }
             }
+        }else{
+            m_goalX = 1;
+            m_goalY = 1;
         }
     }
 
