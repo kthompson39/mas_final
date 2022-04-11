@@ -37,6 +37,7 @@ string chooseWall(Map& map, enum category c, int y, int x, int rando);
 
 //Give tiles certain colors and properties such as blocking or not
 void genColors(Map& map, bool);
+void updateTileColor(Map& map, bool, int y, int x);
 
 //Just used for make walls appear
 void genWalls(Map& map);

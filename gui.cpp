@@ -84,73 +84,86 @@ string chooseWall(Map& map, enum category c, int y, int x, int rando){
     return a;
 }
 
+void updateTileColor(Map& map, bool none_toggle, int y, int x)
+{
+    int f = 15;
+    if (map.tiles[y][x] == None){
+        map.blocks[y][x] = none_toggle; //Blocks is TRUE after generating Hallways
+        map.word[y][x] = "  ";
+        rgb(map, y,x, 0,0,0, 0,0,0);
+        if (surroundingTilesAdj(map, y,x,Hallway) || surroundingTilesAdj(map, y,x,River)  || surroundingTilesAdj(map, y,x,Grass)){
+            map.word[y][x] = "##";
+            rgb(map, y,x, 122,103,58, 0,0,0);
+        }
+    }
+    if (map.tiles[y][x] == Grass){ 
+        int r = rand() % 15;
+        map.blocks[y][x] = 0;
+        if (r == 0) map.word[y][x] = " '";
+        if (r == 1) map.word[y][x] = " ,";
+        if (r == 2) map.word[y][x] = "' ";
+        if (r == 3) map.word[y][x] = ", "; 
+        rgb(map, y,x, 100-f, 255-rand() % 100-f, 100-f,   1, rand() % 25+75-f, 1);
+
+    }else if (map.tiles[y][x] == Floor){ 
+        map.word[y][x] = "  "; 
+        map.blocks[y][x] = 0;
+        int s = rand()%15;
+        rgb(map, y,x, 200,200,200,  100-s,100-s,100-s);
+    }
+    else if (map.tiles[y][x] == Hallway){ 
+        map.word[y][x] = "##"; 
+        map.blocks[y][x] = 0;
+        int s = rand()%15;
+        rgb(map, y,x, 150,150,150,  60-s,60-s,60-s);
+    }
+    else if (map.tiles[y][x] == Wall){ 
+        map.word[y][x] = chooseWall(map, Wall, y,x,0);
+        map.blocks[y][x] = 1; //Blocks is TRUE
+        int s = rand()%15;
+        rgb(map, y,x, 200,200,200,  160-s,160-s,160-s);
+    }
+    else if (map.tiles[y][x] == Door){ 
+        map.word[y][x] = "[]";
+        map.blocks[y][x] = 0;
+        int s = rand()%15;
+        if (!surroundingTilesAdj(map, y,x,Grass)){
+            rgb(map, y,x, 100,200,200,  60-s,110-s,110-s);
+        }else{
+            rgb(map, y,x, 200,200,200,   1, rand() % 25+75-f, 1);
+        }
+    } else if (map.tiles[y][x] == River){ 
+        int r = rand() % 8;
+        map.blocks[y][x] = 0;
+        map.word[y][x] = "  ";
+        if (r == 0) map.word[y][x] = "≈≈";
+        if (r == 1) map.word[y][x] = "≈ ";
+        if (r == 2) map.word[y][x] = " ≈";
+        if (r == 3) map.word[y][x] = " ~";
+        if (r == 4) map.word[y][x] = "~ "; 
+        if (r == 5) map.word[y][x] = "~~"; 
+        rgb(map, y,x, 50,50, 255-rand() % 10,   0,0,rand() % 25+150-f);
+
+    }
+    else if (map.tiles[y][x] == TrapTile){ 
+        map.word[y][x] = "░░"; 
+        map.blocks[y][x] = 0;
+        int s = rand()%15;
+        rgb(map, y,x, 210,30,30,  100-s,100-s,100-s);
+    }
+    else if (map.tiles[y][x] == TreasureTile){ 
+        map.word[y][x] = "$$"; 
+        map.blocks[y][x] = 0;
+        rgb(map, y,x, 255,255,1,  200,200,1);
+    }
+}
+
 //Give tiles certain colors and properties such as blocking or not
 void genColors(Map& map, bool none_toggle){
 
     for (int y = 0; y < sizey; y++) {
         for (int x = 0; x < sizex; x++) {
-
-            int f = 15;
-            if (map.tiles[y][x] == None){
-                map.blocks[y][x] = none_toggle; //Blocks is TRUE after generating Hallways
-                map.word[y][x] = "  ";
-                rgb(map, y,x, 0,0,0, 0,0,0);
-                if (surroundingTilesAdj(map, y,x,Hallway) || surroundingTilesAdj(map, y,x,River)  || surroundingTilesAdj(map, y,x,Grass)){
-                    map.word[y][x] = "##";
-                    rgb(map, y,x, 122,103,58, 0,0,0);
-                }
-            }
-            if (map.tiles[y][x] == Grass){ 
-                int r = rand() % 15;
-                map.blocks[y][x] = 0;
-                if (r == 0) map.word[y][x] = " '";
-                if (r == 1) map.word[y][x] = " ,";
-                if (r == 2) map.word[y][x] = "' ";
-                if (r == 3) map.word[y][x] = ", "; 
-                rgb(map, y,x, 100-f, 255-rand() % 100-f, 100-f,   1, rand() % 25+75-f, 1);
-
-            }else if (map.tiles[y][x] == Floor){ 
-                map.word[y][x] = "  "; 
-                map.blocks[y][x] = 0;
-                int s = rand()%15;
-                rgb(map, y,x, 200,200,200,  100-s,100-s,100-s);
-            }
-            else if (map.tiles[y][x] == Hallway){ 
-                map.word[y][x] = "##"; 
-                map.blocks[y][x] = 0;
-                int s = rand()%15;
-                rgb(map, y,x, 150,150,150,  60-s,60-s,60-s);
-            }
-            else if (map.tiles[y][x] == Wall){ 
-                map.word[y][x] = chooseWall(map, Wall, y,x,0);
-                map.blocks[y][x] = 1; //Blocks is TRUE
-                int s = rand()%15;
-                rgb(map, y,x, 200,200,200,  160-s,160-s,160-s);
-            }
-            else if (map.tiles[y][x] == Door){ 
-                map.word[y][x] = "[]";
-                map.blocks[y][x] = 0;
-                int s = rand()%15;
-                if (!surroundingTilesAdj(map, y,x,Grass)){
-                    rgb(map, y,x, 100,200,200,  60-s,110-s,110-s);
-                }else{
-                    rgb(map, y,x, 200,200,200,   1, rand() % 25+75-f, 1);
-                }
-            } else if (map.tiles[y][x] == River){ 
-                int r = rand() % 8;
-                map.blocks[y][x] = 0;
-                map.word[y][x] = "  ";
-                if (r == 0) map.word[y][x] = "≈≈";
-                if (r == 1) map.word[y][x] = "≈ ";
-                if (r == 2) map.word[y][x] = " ≈";
-                if (r == 3) map.word[y][x] = " ~";
-                if (r == 4) map.word[y][x] = "~ "; 
-                if (r == 5) map.word[y][x] = "~~"; 
-                rgb(map, y,x, 50,50, 255-rand() % 10,   0,0,rand() % 25+150-f);
-
-            }
-
-
+            updateTileColor(map, none_toggle, y, x);
         }
     }
 }

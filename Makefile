@@ -1,4 +1,4 @@
-OBJS = mas.cpp gui.cpp util.cpp map.cpp agent.cpp
+OBJS = mas.cpp gui.cpp util.cpp map.cpp agent.cpp auction.cpp
 
 CC = g++
 

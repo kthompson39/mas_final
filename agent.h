@@ -12,6 +12,9 @@ public:
     void step(std::vector<Agent>& agents, Map& fullMap);
     void moveDirection(Direction d);
     int BFS_to_Undiscovered(int, int);
+    void joinAuction();
+    void leaveAuction();
+    bool bid(int askingPrice, std::vector<int> agentsInAuction);
     
     int m_x = -1;
     int m_y = -1;
@@ -25,4 +28,7 @@ public:
     Map& m_global_map;
 
     bool m_aimless = false;
+    int m_collectStep = -1;
+    bool m_stuck = false;
+    bool m_inAuction = false;
 };

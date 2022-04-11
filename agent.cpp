@@ -2,12 +2,31 @@
 #include "agent.h"
 #include "gui.h"
 #include "util.h"
+#include "definitions.h"
 
 Agent::Agent(int startX, int startY, int numOtherAgents, Map& map) :
-    m_x(startX), m_y(startY), m_likableness(std::vector<int>(numOtherAgents, 50)), m_map(Map(map)), m_global_map(map)
+    m_x(startX), m_y(startY), m_likableness(std::vector<int>(numOtherAgents, INITIAL_LIKABLENESS_VALUE)), m_map(Map(map)), m_global_map(map)
 {
 }
 
+void Agent::joinAuction()
+{
+    m_collectStep = -1;
+    m_inAuction = true;
+}
+
+void Agent::leaveAuction()
+{
+    m_collectStep = -1;
+    m_inAuction = false;
+    m_aimless = true;
+}
+
+bool Agent::bid(int askingPrice, std::vector<int> agentsInAuction)
+{
+    //TODO implement agent bidding in auctions
+    return rand()%2;
+}
 
 int Agent::updateInternalMap(Map& fullMap)
 {
@@ -33,6 +52,8 @@ int Agent::updateInternalMap(Map& fullMap)
                     discovered += 1;
                 }
             }
+
+            m_map.tiles[y][x] = m_global_map.tiles[y][x];
         }
     }
     return discovered;
@@ -148,9 +169,29 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
 {
     updateInternalMap(map);
 
+    if(m_stuck || m_inAuction)
+    {
+        return;
+    }
+
+    // if agent is collecting treasure, continue collecting treasure
+    if(m_collectStep > -1)
+    {
+        m_collectStep++;
+        return;
+    }
+
 
     if (m_goalX == m_x && m_goalY == m_y){
-        m_aimless = true; //Agent no longer has a goal
+        // if agent is on treasure, start collecting it
+        if(m_map.tiles[m_y][m_x] == TreasureTile)
+        {
+            m_collectStep = 0;
+        }
+        else
+        {
+            m_aimless = true; //Agent no longer has a goal
+        }
     }
 
     //If agent has no goal yet...set a goal to an undiscovered floor tile
@@ -159,7 +200,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
         int check = 0;
         for (int x = 0; x < sizex; x++){
             for (int y = 0; y < sizey; y++){
-                if (m_global_map.tiles[y][x] == Floor && m_global_map.discovered[y][x] < .5){
+                if ((m_global_map.tiles[y][x] == TreasureTile) || (m_global_map.tiles[y][x] == Floor && m_global_map.discovered[y][x] < .5)){
                     check++;
                 }
             }
@@ -169,13 +210,13 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
             int r = rand()%check; check = 0;
             for (int x = 0; x < sizex; x++){
                 for (int y = 0; y < sizey; y++){
-                    if (m_global_map.tiles[y][x] == Floor && m_global_map.discovered[y][x] < .5){
-                        check++;
+                    if ((m_global_map.tiles[y][x] == TreasureTile) || (m_global_map.tiles[y][x] == Floor && m_global_map.discovered[y][x] < .5)){
                         if (r == check){
                             m_goalX = x;
                             m_goalY = y;
                             m_aimless = false; //Agent is no longer aimless (has a goal)
                         }
+                        check++;
                     }
                 }
             }

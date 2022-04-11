@@ -1,5 +1,8 @@
-#ifndef __room_h__
-#define __room_h__
+#pragma once
+
+#include <vector>
+#include "treasure.h"
+#include "trap.h"
 
 struct Room {
     int lowerx; //Coordinates of lower right corner 
@@ -10,4 +13,3 @@ struct Room {
     int doory;
 };
 
-#endif

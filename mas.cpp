@@ -2,6 +2,7 @@
 #include <string>
 #include "gui.h"
 #include "util.h"
+#include "auction.h"
 #include "agent.h"
 
 using namespace std;
@@ -47,6 +48,9 @@ int main(int argc, char *argv[]){
 
     auto agents = createAgents(5, 2,2, map);
 
+    // holds current, ongoing auctions
+    std::list<Auction> auctions;
+
     while(1){
 
         turns++;
@@ -54,6 +58,72 @@ int main(int argc, char *argv[]){
         for (Agent& agent: agents)
         {
             agent.step(agents, map);
+        }
+
+        std::vector<int> treasure_subset_indices;
+        int k = 0;
+        for(Treasure& treasure: map.treasures)
+        {
+            std::vector<int> agentsOnTile = getAgentsOnTile(treasure.x, treasure.y, agents, map);
+
+            if(agentsOnTile.size() == 1)
+            {
+                int i = agentsOnTile[0];
+                // if agent collected treasure for full time
+                if(agents[i].m_collectStep >= TREASURE_COLLECTION_TIME)
+                {
+                    // remove treasure
+                    treasure_subset_indices.push_back(k);
+
+                    // give agent treasure
+                    agents[i].m_collectStep = -1;
+                    agents[i].m_treasureCount += treasure.value;
+
+                    // update map
+                    map.tiles[treasure.y][treasure.x] = Floor;
+                    updateTileColor(map, none_toggle, treasure.y, treasure.x);
+                }
+            }
+            // start auction for treasure
+            else if(agentsOnTile.size() > 1)
+            {
+                // start auction with agents
+                auctions.push_back(Auction(agents, agentsOnTile, treasure));
+                for(int i: agentsOnTile)
+                {
+                    agents[i].joinAuction();
+                }
+
+                // remove treasure from treasure list since its now in an auction
+                treasure_subset_indices.push_back(k);
+                // update map
+                map.tiles[treasure.y][treasure.x] = Floor;
+                updateTileColor(map, none_toggle, treasure.y, treasure.x);
+            }
+
+            k++;
+        }
+        // remove collected treasure
+        if(treasure_subset_indices.size() > 0)
+        {
+            removeSubset(map.treasures, treasure_subset_indices);
+        }
+
+        std::vector<int> auction_subset_indices;
+        k = 0;
+        for(Auction& auction: auctions)
+        {
+            auction.step();
+            if(auction.m_isOver)
+            {
+                auction_subset_indices.push_back(k);
+            }
+            k++;
+        }
+        // remove collected treasure
+        if(auction_subset_indices.size() > 0)
+        {
+            removeSubset(auctions, auction_subset_indices);
         }
 
         for (int j = 0; j < LINES; j++){
@@ -74,6 +144,7 @@ int main(int argc, char *argv[]){
                 //Refresh Display Tile
                 float v = map.discovered[y][x];
                 int agentOnTile = isAgentOnTile(x, y, agents, map);
+
 
                 if (x == px && y == py){ //Display Player
                     printT(i*2,j, "Al" ,255,255,1,  200,200,1);

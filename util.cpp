@@ -48,11 +48,94 @@ void genRandom(Map& map){
                     r.lowery = y;
                     r.room_w = w;
                     r.room_h = h;
+                    auto treasure_locations = genTreasure(r);
+                    auto trap_locations = genTrap(r, treasure_locations);
+
+                    for(auto& t: treasure_locations)
+                    {
+                        map.tiles[t.y][t.x] = TreasureTile;
+                        map.treasures.push_back(Treasure{t.x,t.y,1});
+                    }
+
+                    for(auto& t: trap_locations)
+                    {
+                        map.tiles[t.y][t.x] = TrapTile;
+                    }
+                    map.traps = std::move(trap_locations);
+
                     map.rooms.push_back(r);
                 }
             }
         }
     }
+}
+
+bool isLocationValid(Location l, std::list<Location> locations)
+{
+    for(Location& location: locations)
+    {
+        if(l.x == location.x &&
+           l.y == location.y
+          )
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+std::list<Location> genTreasure(Room& room)
+{
+    int area = (room.room_w - 1) * (room.room_h - 1);
+    // generate [1,MAX_TREASURE], but accomodate for
+    // size of the room
+    int treasure_limit = std::min(std::max(1,area / 4), MAX_TREASURES_PER_ROOM);
+
+    int treasure_count = rand() % treasure_limit;
+
+    std::list<Location> treasure_locations;
+    for(int i = 0; i < treasure_count; i++)
+    {
+        Location l;
+
+        while(true)
+        {
+            l.x = room.lowerx - 1 - (rand() % (room.room_w - 2));
+            l.y = room.lowery - 1 - (rand() % (room.room_h - 2));
+            if(isLocationValid(l, treasure_locations))
+                break;
+        }
+        treasure_locations.push_back(l);
+    }
+
+    return treasure_locations;
+}
+
+std::list<Location> genTrap(Room& room, std::list<Location> invalid_locations)
+{
+    int area = (room.room_w - 1) * (room.room_h - 1);
+    // generate [0,MAX_TRAP] amound of traps per room,
+    // with accomodation of room size
+    int trap_limit = std::min(area / 4, MAX_TRAPS_PER_ROOM);
+
+    int trap_count = rand() % trap_limit;
+
+    std::list<Location> trap_locations;
+    for(int i = 0; i < trap_count; i++)
+    {
+        Location l;
+
+        while(true)
+        {
+            l.x = room.lowerx - 1 - (rand() % (room.room_w - 2));
+            l.y = room.lowery - 1 - (rand() % (room.room_h - 2));
+            if(isLocationValid(l, trap_locations) && isLocationValid(l, invalid_locations))
+                break;
+        }
+        trap_locations.push_back(l);
+    }
+
+    return trap_locations;
 }
 
 //Essentially BFS algorithm to reach a tile equal to "find" and change all tiles along the shortest path between the points to "change"
@@ -188,6 +271,8 @@ bool isTileOccupiable(int x, int y, Map& map)
     if(map.tiles[y][x] == Grass ||
        map.tiles[y][x] == Floor || 
        map.tiles[y][x] == Hallway || 
+       map.tiles[y][x] == TrapTile || 
+       map.tiles[y][x] == TreasureTile || 
        map.tiles[y][x] == Door)
     {
         return true;
@@ -245,5 +330,18 @@ int isAgentOnTile(int x, int y, std::vector<Agent>& agents, Map& map)
         }
     }
     return -1;
+}
+
+std::vector<int> getAgentsOnTile(int x, int y, std::vector<Agent>& agents, Map& map)
+{
+    std::vector<int> agentsOnTile;
+    for(size_t i = 0; i < agents.size(); i++)
+    {
+        if(agents[i].m_x == x && agents[i].m_y == y)
+        {
+            agentsOnTile.push_back(i);
+        }
+    }
+    return agentsOnTile;
 }
 
