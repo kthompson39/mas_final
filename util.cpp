@@ -314,7 +314,7 @@ std::vector<Agent> createAgents(int numAgents, int startX, int startY, Map& map)
     std::vector<Agent> agents;
     for(int i = 0; i < numAgents; i++)
     {
-        agents.push_back(Agent(startX,startY, numAgents, map));
+        agents.push_back(Agent(startX+rand()%4,startY+rand()%5, numAgents, map, i));
     }
 
     return agents;

@@ -6,7 +6,7 @@
 
 class Agent {
 public:
-    Agent(int startX, int startY, int numOtherAgents, Map& map);
+    Agent(int startX, int startY, int numOtherAgents, Map& map, int id);
 
     int updateInternalMap(Map& fullMap);
     void step(std::vector<Agent>& agents, Map& fullMap);
@@ -18,7 +18,7 @@ public:
     
     int m_x = -1;
     int m_y = -1;
-    int m_treasureCount;
+    int m_treasureCount = 0;
     std::vector<int> m_likableness;
 
     int m_goalX = -1;
@@ -31,4 +31,7 @@ public:
     int m_collectStep = -1;
     bool m_stuck = false;
     bool m_inAuction = false;
+    int m_health = 20;
+    int m_id = -1;
+    int m_targetId = -1;
 };

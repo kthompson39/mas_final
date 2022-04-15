@@ -4,8 +4,9 @@
 #include "util.h"
 #include "definitions.h"
 
-Agent::Agent(int startX, int startY, int numOtherAgents, Map& map) :
-    m_x(startX), m_y(startY), m_likableness(std::vector<int>(numOtherAgents, INITIAL_LIKABLENESS_VALUE)), m_map(Map(map)), m_global_map(map)
+Agent::Agent(int startX, int startY, int numOtherAgents, Map& map, int id) :
+    m_x(startX), m_y(startY), m_likableness(std::vector<int>(numOtherAgents, INITIAL_LIKABLENESS_VALUE)), 
+    m_map(Map(map)), m_global_map(map), m_id(id)
 {
 }
 
@@ -169,7 +170,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
 {
     updateInternalMap(map);
 
-    if(m_stuck || m_inAuction)
+    if(m_stuck || m_inAuction || m_health <= 0)
     {
         return;
     }
@@ -197,34 +198,123 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
     //If agent has no goal yet...set a goal to an undiscovered floor tile
     if ((m_goalX == -1 && m_goalY == -1) || m_aimless == true){
         //Look through all tiles in map that match certain criteria
-        int check = 0;
+        int check_t = 0; //Count treasure tiles
+        int check_d = 0; //Count tiles to discover
+        int check_m = 0; //Count agents with treasures in order to mug
+
         for (int x = 0; x < sizex; x++){
             for (int y = 0; y < sizey; y++){
-                if ((m_global_map.tiles[y][x] == TreasureTile) || (m_global_map.tiles[y][x] == Floor && m_global_map.discovered[y][x] < .5)){
-                    check++;
+
+                //Various conditions to search for
+                if (m_map.tiles[y][x] == TreasureTile && m_map.discovered[y][x] > .5) check_t++;
+                if (isTileOccupiable(x, y, m_map) 
+                    && m_map.discovered[y][x] < .5
+                    && (m_map.discovered[y][x+1] > .5
+                    || m_map.discovered[y][x-1] > .5
+                    || m_map.discovered[y+1][x] > .5
+                    || m_map.discovered[y-1][x] > .5
+                    || m_map.discovered[y+1][x+1] > .5
+                    || m_map.discovered[y-1][x+1] > .5
+                    || m_map.discovered[y+1][x-1] > .5
+                    || m_map.discovered[y-1][x-1] > .5)) check_d++;
+             
+                for (Agent& agent: agents){
+                    if(agent.m_health > 0 && agent.m_treasureCount > 5 
+                        && m_id != agent.m_id && m_targetId == -1) check_m++;
                 }
+
             }
         }
-        //Randomly select a tile to make the new goal
-        if (check > 0){
-            int r = rand()%check; check = 0;
+
+        //Agents will explore by default. But will seek Treasure if any treasure lies in their discovered m_map array.
+        auto             agent_top_want = "Explore";
+        if (check_m > 0) agent_top_want = "Mug";
+        if (check_t > 0) agent_top_want = "Treasure";
+
+        if (check_t > 0 || check_d > 0 || check_m > 0){
+            int r_t = 0; int r_d = 0; int r_m = 0;
+            
+            if (check_t > 0){
+                r_t = rand()%check_t; check_t = 0;
+            }
+            if (check_d > 0){
+                r_d = rand()%check_d; check_d = 0;
+            }
+            if (check_m > 0){
+                r_m = rand()%check_m; check_m = 0;
+            }
+
             for (int x = 0; x < sizex; x++){
                 for (int y = 0; y < sizey; y++){
-                    if ((m_global_map.tiles[y][x] == TreasureTile) || (m_global_map.tiles[y][x] == Floor && m_global_map.discovered[y][x] < .5)){
-                        if (r == check){
+
+                    //Check for same conditions as above
+                    if (m_map.tiles[y][x] == TreasureTile && m_map.discovered[y][x] > .5 && agent_top_want == "Treasure"){
+                        if (r_t == check_t){
                             m_goalX = x;
                             m_goalY = y;
-                            m_aimless = false; //Agent is no longer aimless (has a goal)
+                            m_aimless = false; //Agent is no longer aimless (has a goal to go to Treasure coordinates)
                         }
-                        check++;
+                        check_t++;
                     }
+                    if (agent_top_want == "Explore" && isTileOccupiable(x, y, m_map) 
+                        && m_map.discovered[y][x] < .5
+                        && (m_map.discovered[y][x+1] > .5
+                        || m_map.discovered[y][x-1] > .5
+                        || m_map.discovered[y+1][x] > .5
+                        || m_map.discovered[y-1][x] > .5
+                        || m_map.discovered[y+1][x+1] > .5
+                        || m_map.discovered[y-1][x+1] > .5
+                        || m_map.discovered[y+1][x-1] > .5
+                        || m_map.discovered[y-1][x-1] > .5)){
+
+                        if (r_d == check_d){
+                            m_goalX = x;
+                            m_goalY = y;
+                            m_aimless = false; //Agent is no longer aimless (has a goal to go to Undiscovered Tile within its own map array)
+                        }
+                        check_d++;
+                    }
+
+                    for (Agent& agent: agents){
+                        if(agent.m_health > 0 && agent.m_treasureCount > 5 
+                            && m_id != agent.m_id && m_targetId == -1){
+
+                            if (r_m == check_m){
+                                m_targetId = agent.m_id;
+                            }
+                            check_m++;
+                        }
+                    }
+
                 }
             }
         }else{
-            m_goalX = 1;
+            m_goalX = 1; //If no objectives remain, head to top left corner
             m_goalY = 1;
         }
     }
+
+    if (m_targetId != -1){ //Current target coordinate is another agent
+        for (Agent& agent: agents)
+        {
+            if (agent.m_id == m_targetId){
+                m_goalX = agent.m_x; //Set goal coordinates to target agent coordinates
+                m_goalY = agent.m_y;
+                if ((m_x == m_goalX && m_y == m_goalY) 
+                || (m_x+1 == m_goalX && m_y == m_goalY)
+                || (m_x-1 == m_goalX && m_y == m_goalY)
+                || (m_x == m_goalX && m_y+1 == m_goalY
+                || (m_x == m_goalX && m_y-1 == m_goalY))){ //If arrive at agent, mug target
+                    m_treasureCount += agent.m_treasureCount;
+                    agent.m_treasureCount = 0;
+                    agent.m_health -= 10;
+                    m_targetId = -1;
+                }
+            }
+        }
+    }
+
+
 
     BFS_to_Undiscovered(m_y, m_x);
 

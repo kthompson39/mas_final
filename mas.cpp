@@ -46,7 +46,7 @@ int main(int argc, char *argv[]){
     //px = map.rooms[0].lowerx-2; //Set user to coordinates of room[0]
     //py = map.rooms[0].lowery-2;
 
-    auto agents = createAgents(5, 2,2, map);
+    auto agents = createAgents(5, 1,1, map);
 
     // holds current, ongoing auctions
     std::list<Auction> auctions;
@@ -59,6 +59,9 @@ int main(int argc, char *argv[]){
         {
             agent.step(agents, map);
         }
+
+
+        /////////////////////////////////////////////////////////
 
         std::vector<int> treasure_subset_indices;
         int k = 0;
@@ -125,6 +128,7 @@ int main(int argc, char *argv[]){
         {
             removeSubset(auctions, auction_subset_indices);
         }
+        /////////////////////////////////////////////////////////////////////////
 
         for (int j = 0; j < LINES; j++){
             for (int i = 0; i < COLS / 2; i++){
@@ -142,17 +146,33 @@ int main(int argc, char *argv[]){
                 }
                 
                 //Refresh Display Tile
-                float v = map.discovered[y][x];
+
+                float v = 0.3;
+                for (Agent& agent: agents)
+                {
+                    v = agent.m_map.discovered[y][x]; //Show map of last indexed agent
+                    px = agent.m_x; 
+                    py = agent.m_y; //Causes camera to follow this agent
+                }
+
+                // float v = map.discovered[y][x]; //Show global map
                 int agentOnTile = isAgentOnTile(x, y, agents, map);
 
 
                 if (x == px && y == py){ //Display Player
-                    printT(i*2,j, "Al" ,255,255,1,  200,200,1);
+                    // printT(i*2,j, "Al" ,255,255,1,  200,200,1);
                 }
-                else if(agentOnTile > -1)
+                
+                if(agentOnTile > -1)
                 {
                     std::string agent_name = std::to_string(agentOnTile) + " ";
-                    printT(i*2,j, agent_name ,0,0,0,  200,200,1);
+                    
+                    if (agents[agentOnTile].m_health > 0)
+                        printT(i*2,j, agent_name ,0,0,0,  200,200,1);
+                    else
+                        printT(i*2,j, agent_name ,0,0,0,  200,1,1);
+
+
                 }
                 else{ //Display Tile
                     printT(i*2,j, 

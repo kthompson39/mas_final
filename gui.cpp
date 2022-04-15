@@ -146,15 +146,15 @@ void updateTileColor(Map& map, bool none_toggle, int y, int x)
 
     }
     else if (map.tiles[y][x] == TrapTile){ 
-        map.word[y][x] = "░░"; 
+        map.word[y][x] = "^^"; 
         map.blocks[y][x] = 0;
         int s = rand()%15;
-        rgb(map, y,x, 210,30,30,  100-s,100-s,100-s);
+        rgb(map, y,x, 255,50,50,  200-s,50-s,50-s);
     }
     else if (map.tiles[y][x] == TreasureTile){ 
         map.word[y][x] = "$$"; 
         map.blocks[y][x] = 0;
-        rgb(map, y,x, 255,255,1,  200,200,1);
+        rgb(map, y,x, 255,180,1,  200,130,1);
     }
 }
 
