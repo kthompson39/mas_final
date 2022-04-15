@@ -150,9 +150,11 @@ int main(int argc, char *argv[]){
                 float v = 0.3;
                 for (Agent& agent: agents)
                 {
-                    v = agent.m_map.discovered[y][x]; //Show map of last indexed agent
-                    px = agent.m_x; 
-                    py = agent.m_y; //Causes camera to follow this agent
+                    if (agent.m_health > 0){
+                        v = agent.m_map.discovered[y][x]; //Show map of last indexed agent
+                        px = agent.m_x; 
+                        py = agent.m_y; //Causes camera to follow this agent
+                    }
                 }
 
                 // float v = map.discovered[y][x]; //Show global map
