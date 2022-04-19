@@ -63,6 +63,9 @@ int main(int argc, char *argv[]){
 
         /////////////////////////////////////////////////////////
 
+        /////////////////////////////////////////////////////////
+        // TREASURES
+        /////////////////////////////////////////////////////////
         std::vector<int> treasure_subset_indices;
         int k = 0;
         for(Treasure& treasure: map.treasures)
@@ -112,6 +115,10 @@ int main(int argc, char *argv[]){
             removeSubset(map.treasures, treasure_subset_indices);
         }
 
+
+        /////////////////////////////////////////////////////////
+        // AUCTIONS
+        /////////////////////////////////////////////////////////
         std::vector<int> auction_subset_indices;
         k = 0;
         for(Auction& auction: auctions)
@@ -123,11 +130,12 @@ int main(int argc, char *argv[]){
             }
             k++;
         }
-        // remove collected treasure
+        // remove completed auctions 
         if(auction_subset_indices.size() > 0)
         {
             removeSubset(auctions, auction_subset_indices);
         }
+
         /////////////////////////////////////////////////////////////////////////
 
         for (int j = 0; j < LINES; j++){
@@ -157,7 +165,7 @@ int main(int argc, char *argv[]){
                     }
                 }
 
-                // float v = map.discovered[y][x]; //Show global map
+                //v = map.discovered[y][x]; //Show global map
                 int agentOnTile = isAgentOnTile(x, y, agents, map);
 
 

@@ -31,7 +31,7 @@ public:
     int m_collectStep = -1;
     bool m_stuck = false;
     bool m_inAuction = false;
-    int m_health = 20;
+    int m_health = INITIAL_AGENT_HEALTH_VALUE;
     int m_id = -1;
     int m_targetId = -1;
 };
