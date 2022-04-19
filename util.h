@@ -30,8 +30,8 @@ bool isTileOccupiable(int x, int y, Map& map);
 /*
  * This assumes that 
  */
-template <class T>
-void removeSubset(std::list<T>& fullList, std::vector<int> subset)
+template <typename Container>
+void removeSubset(Container& fullList, std::vector<int> subset)
 {
     int i = 0;
     int j = 0;
