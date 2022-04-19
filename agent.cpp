@@ -207,16 +207,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
 
                 //Various conditions to search for
                 if (m_map.tiles[y][x] == TreasureTile && m_map.discovered[y][x] > .5) check_t++;
-                if (isTileOccupiable(x, y, m_map) 
-                    && m_map.discovered[y][x] < .5
-                    && (m_map.discovered[y][x+1] > .5
-                    || m_map.discovered[y][x-1] > .5
-                    || m_map.discovered[y+1][x] > .5
-                    || m_map.discovered[y-1][x] > .5
-                    || m_map.discovered[y+1][x+1] > .5
-                    || m_map.discovered[y-1][x+1] > .5
-                    || m_map.discovered[y+1][x-1] > .5
-                    || m_map.discovered[y-1][x-1] > .5)) check_d++;
+                if (isTileOccupiable(x, y, m_map) && m_map.discovered[y][x] < .5) check_d++;
              
                 for (Agent& agent: agents){
                     if(agent.m_health > 0 && agent.m_treasureCount > 5 
@@ -256,16 +247,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                         }
                         check_t++;
                     }
-                    if (agent_top_want == "Explore" && isTileOccupiable(x, y, m_map) 
-                        && m_map.discovered[y][x] < .5
-                        && (m_map.discovered[y][x+1] > .5
-                        || m_map.discovered[y][x-1] > .5
-                        || m_map.discovered[y+1][x] > .5
-                        || m_map.discovered[y-1][x] > .5
-                        || m_map.discovered[y+1][x+1] > .5
-                        || m_map.discovered[y-1][x+1] > .5
-                        || m_map.discovered[y+1][x-1] > .5
-                        || m_map.discovered[y-1][x-1] > .5)){
+                    if (agent_top_want == "Explore" && isTileOccupiable(x, y, m_map) && m_map.discovered[y][x] < .5){
 
                         if (r_d == check_d){
                             m_goalX = x;
