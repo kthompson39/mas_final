@@ -208,7 +208,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                 //Various conditions to search for
                 if (m_map.tiles[y][x] == TreasureTile && m_map.discovered[y][x] > .5) check_t++;
                 if (isTileOccupiable(x, y, m_map) && m_map.discovered[y][x] < .5) check_d++;
-             
+            
                 for (Agent& agent: agents){
                     if(agent.m_health > 0 && agent.m_treasureCount > 5 
                         && m_id != agent.m_id && m_targetId == -1) check_m++;
@@ -218,7 +218,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
         }
 
         //Agents will explore by default. But will seek Treasure if any treasure lies in their discovered m_map array.
-        auto             agent_top_want = "Explore";
+        std::string      agent_top_want = "Explore";
         if (check_m > 0) agent_top_want = "Mug";
         if (check_t > 0) agent_top_want = "Treasure";
 
@@ -285,8 +285,8 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                 if ((m_x == m_goalX && m_y == m_goalY) 
                 || (m_x+1 == m_goalX && m_y == m_goalY)
                 || (m_x-1 == m_goalX && m_y == m_goalY)
-                || (m_x == m_goalX && m_y+1 == m_goalY
-                || (m_x == m_goalX && m_y-1 == m_goalY))){ //If arrive at agent, mug target
+                || (m_x == m_goalX && m_y+1 == m_goalY)
+                || (m_x == m_goalX && m_y-1 == m_goalY)){ //If arrive at agent, mug target
                     m_treasureCount += agent.m_treasureCount;
                     agent.m_treasureCount = 0;
                     agent.m_health -= 10;
@@ -295,7 +295,6 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
             }
         }
     }
-
 
 
     BFS_to_Undiscovered(m_y, m_x);
