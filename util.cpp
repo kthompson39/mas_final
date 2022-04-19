@@ -60,8 +60,8 @@ void genRandom(Map& map){
                     for(auto& t: trap_locations)
                     {
                         map.tiles[t.y][t.x] = TrapTile;
+                        map.traps.push_back(Trap{t.x,t.y, false, std::vector<int>{}});
                     }
-                    map.traps = std::move(trap_locations);
 
                     map.rooms.push_back(r);
                 }

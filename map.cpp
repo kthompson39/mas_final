@@ -34,5 +34,7 @@ Map::Map(const Map& map)
     copyVector(map.extra, this->extra);
 
     this->rooms = std::vector<Room>(map.rooms);
+    this->treasures = std::list<Treasure>(map.treasures);
+    this->traps = std::list<Trap>(map.traps);
 }
 

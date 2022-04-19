@@ -6,7 +6,7 @@
 
 #include "room.h"
 #include "treasure.h"
-#include "location.h"
+#include "trap.h"
 #include "definitions.h"
 
 using namespace std;
@@ -31,7 +31,7 @@ class Map {
     float discovered[sizey][sizex]; //Light value of the tile. 0 to 1 range
     int blocks[sizey][sizex]; //Whether the tile blocks or not (0 if not, 1 if yes)
     std::list<Treasure> treasures;
-    std::list<Location> traps;
+    std::list<Trap> traps;
     vector<Room> rooms; //Room vector, contains info for every room created
 };
 

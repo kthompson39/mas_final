@@ -7,6 +7,7 @@ static const int MAX_TREASURES_PER_ROOM = 5;
 static const int TREASURE_COLLECTION_TIME = 10;
 static const int INITIAL_LIKABLENESS_VALUE = 50;
 static const int INITIAL_AGENT_HEALTH_VALUE = 20;
+static const int TRAP_DAMAGE_PER_TICK = 1;
 
 //Used only in Dij(...)
 struct Tree {
