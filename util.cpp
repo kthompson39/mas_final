@@ -337,7 +337,7 @@ std::vector<int> getAgentsOnTile(int x, int y, std::vector<Agent>& agents, Map& 
     std::vector<int> agentsOnTile;
     for(size_t i = 0; i < agents.size(); i++)
     {
-        if(agents[i].m_x == x && agents[i].m_y == y)
+        if(agents[i].m_x == x && agents[i].m_y == y && agents[i].m_health > 0)
         {
             agentsOnTile.push_back(i);
         }

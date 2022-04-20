@@ -51,7 +51,7 @@ int main(int argc, char *argv[]){
     {
         Map map(original_map);
         genColors(map, none_toggle);
-        auto agents = createAgents(15, 1,1, map);
+        auto agents = createAgents(20, 1,1, map);
 
         // holds current, ongoing auctions
         std::list<Auction> auctions;
@@ -261,6 +261,7 @@ int main(int argc, char *argv[]){
 
                     }
                     else{ //Display Tile
+                        v = 1; 
                         printT(i*2,j, 
                                 map.word[y][x] ,
                                 map.f_r[y][x]*v, 

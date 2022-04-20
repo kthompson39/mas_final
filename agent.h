@@ -11,7 +11,7 @@ public:
     int updateInternalMap(Map& fullMap);
     void step(std::vector<Agent>& agents, Map& fullMap);
     void moveDirection(Direction d);
-    int BFS_to_Undiscovered(int, int);
+    int BFS_to_Undiscovered(int, int, bool);
     void joinAuction();
     void leaveAuction();
     bool bid(int askingPrice, std::vector<int> agentsInAuction);
