@@ -228,7 +228,8 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
         }
     }
 
-    int steal_treasure = 1;
+    int steal_treasure = 4;
+    int notice_agents = 12; //distance of radius from which to notice other agents
 
     //If agent has no goal yet...set a goal to an undiscovered floor tile
     if ((m_goalX == -1 && m_goalY == -1) || m_aimless == true){
@@ -244,9 +245,14 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                 if (m_map.tiles[y][x] == TreasureTile && m_map.discovered[y][x] > .8) check_t++;
                 if (isTileOccupiable(x, y, m_map) && m_map.discovered[y][x] < .8) check_d++;
             
+
                 for (Agent& agent: agents){
+                    float a = agent.m_x - m_x;
+                    float b = agent.m_y - m_y;
+                    float c = sqrt(a*a + b*b);
                     if(agent.m_health > 0 && agent.m_treasureCount > steal_treasure 
-                        && m_id != agent.m_id && m_targetId == -1) check_m++;
+                        && m_id != agent.m_id && m_targetId == -1
+                        && c <= notice_agents) check_m++;
                 }
 
             }
@@ -292,9 +298,16 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                         check_d++;
                     }
                     if (agent_top_want == "Mug"){
+
                         for (Agent& agent: agents){
+
+                            float a = agent.m_x - m_x;
+                            float b = agent.m_y - m_y;
+                            float c = sqrt(a*a + b*b);
+
                             if(agent.m_health > 0 && agent.m_treasureCount > steal_treasure 
-                                && m_id != agent.m_id && m_targetId == -1){
+                                && m_id != agent.m_id && m_targetId == -1
+                                && c <= notice_agents){
 
                                 if (r_m == check_m){
                                     m_targetId = agent.m_id;

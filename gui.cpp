@@ -240,35 +240,50 @@ float calcLighting(Map& map, int posx, int posy, int x, int y, float brightness)
 //Adds doors to rooms by recalling the room information from the "rooms" vector
 void addDoor(Map& map){
     for (int i = 0; i < map.rooms.size(); i++){
-        int dir = rand()%4;
+
+        int fx, fy;
         int sx, sy; //start x and start y
-        if (dir == 0){ //Right side
-            sy = map.rooms[i].lowery - map.rooms[i].room_h/2;
-            sx = map.rooms[i].lowerx;
-            map.tiles[sy][sx+1] = Hallway;
-        }
-        if (dir == 1){ //Left side
-            sx = map.rooms[i].lowerx - map.rooms[i].room_w+1;
-            sy = map.rooms[i].lowery - map.rooms[i].room_h/2;
-            map.tiles[sy][sx-1] = Hallway;
-        }
-        if (dir == 2){ //Top side
-            sy = map.rooms[i].lowery - map.rooms[i].room_h+1;
-            sx = map.rooms[i].lowerx - map.rooms[i].room_w/2;
-            map.tiles[sy-1][sx] = Hallway;
-        }
-        if (dir == 3){ //Bottom side
-            sy = map.rooms[i].lowery;
-            sx = map.rooms[i].lowerx - map.rooms[i].room_w/2;
-            map.tiles[sy+1][sx] = Hallway;
-        }
+
+        int r = rand()%2+1;
+        r = 2;
+        for (int j = 0; j < r; j++){
+
+            int dir = rand()%4;
+            if (dir == 0){ //Right side
+                sy = map.rooms[i].lowery - map.rooms[i].room_h/2;
+                sx = map.rooms[i].lowerx;
+                map.tiles[sy][sx+1] = Hallway;
+            }
+            if (dir == 1){ //Left side
+                sx = map.rooms[i].lowerx - map.rooms[i].room_w+1;
+                sy = map.rooms[i].lowery - map.rooms[i].room_h/2;
+                map.tiles[sy][sx-1] = Hallway;
+            }
+            if (dir == 2){ //Top side
+                sy = map.rooms[i].lowery - map.rooms[i].room_h+1;
+                sx = map.rooms[i].lowerx - map.rooms[i].room_w/2;
+                map.tiles[sy-1][sx] = Hallway;
+            }
+            if (dir == 3){ //Bottom side
+                sy = map.rooms[i].lowery;
+                sx = map.rooms[i].lowerx - map.rooms[i].room_w/2;
+                map.tiles[sy+1][sx] = Hallway;
+            }
+
+            Dij(map, sy,sx, Door, Hallway); //y,x start, find Door, Change to Hallway along shortest path
+            map.rooms[i].doorx = sx;
+            map.rooms[i].doory = sy;
+
+            if (j == 0){ //Save coordinates of first door
+                fx = sx; fy = sy;
+            }
         
-        Dij(map, sy,sx, Door, Hallway); //y,x start, find Road, Change to Hallway along shortest path
-        map.tiles[sy][sx] = Door;
+        }
         map.blocks[sy][sx] = 0;
-        map.rooms[i].doorx = sx;
-        map.rooms[i].doory = sy;
-        
+        map.blocks[fy][fx] = 0;
+
+        map.tiles[sy][sx] = Door;
+        map.tiles[fy][fx] = Door;
     }
 
     //Make room of index 0 be different

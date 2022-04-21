@@ -22,6 +22,7 @@ int main(int argc, char *argv[]){
     srand(time(0));
 
     WINDOW* win = stdscr;
+    bool show_all_map = false;
     setlocale(LC_ALL, "");
 
     initscr();
@@ -230,7 +231,6 @@ int main(int argc, char *argv[]){
                     }
 
                     //Refresh Display Tile
-
                     float v = 0.3;
                     for (Agent& agent: agents)
                     {
@@ -238,8 +238,11 @@ int main(int argc, char *argv[]){
                             v = agent.m_map.discovered[y][x]; //Show map of last indexed agent
                             px = agent.m_x; 
                             py = agent.m_y; //Causes camera to follow this agent
+                            if (v < .8) v = .4;
                         }
                     }
+                    if (show_all_map)
+                        v = 1; //Uncomment for complete brightness 
 
                     //v = map.discovered[y][x]; //Show global map
                     int agentOnTile = isAgentOnTile(x, y, agents, map);
@@ -254,22 +257,22 @@ int main(int argc, char *argv[]){
                         std::string agent_name = std::to_string(agentOnTile) + " ";
 
                         if (agents[agentOnTile].m_health > 0)
-                            printT(i*2,j, agent_name ,0,0,0,  200,200,1);
+                            printT(i*2,j, agent_name ,0,0,0,  200*v,200*v,1);
                         else
-                            printT(i*2,j, agent_name ,0,0,0,  200,1,1);
+                            printT(i*2,j, agent_name ,0,0,0,  200*v,1,1);
 
 
                     }
                     else{ //Display Tile
-                        v = 1; 
+
                         printT(i*2,j, 
-                                map.word[y][x] ,
-                                map.f_r[y][x]*v, 
-                                map.f_g[y][x]*v, 
-                                map.f_b[y][x]*v, 
-                                map.b_r[y][x]*v, 
-                                map.b_g[y][x]*v, 
-                                map.b_b[y][x]*v);
+                            map.word[y][x] ,
+                            map.f_r[y][x]*v, 
+                            map.f_g[y][x]*v, 
+                            map.f_b[y][x]*v, 
+                            map.b_r[y][x]*v, 
+                            map.b_g[y][x]*v, 
+                            map.b_b[y][x]*v);
                     }
                 }
             }
@@ -288,6 +291,7 @@ int main(int argc, char *argv[]){
             }
             if (ch == 65){ //Up
                 py--;
+                show_all_map = 1 - show_all_map;
             }
             if (ch == 66){ //Down
                 py++;
