@@ -26,6 +26,7 @@ void Auction::giveWinTo(int agent_index)
 
 void Auction::step()
 {
+    m_askingPrice += 5;
     giveWinTo(m_agentsInAuction[0]);
 
     m_isOver = true;
