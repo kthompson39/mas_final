@@ -229,7 +229,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
     }
 
     int steal_treasure = 4;
-    int notice_agents = 12; //distance of radius from which to notice other agents
+    int notice_agents = 10; //distance of radius from which to notice other agents
 
     //If agent has no goal yet...set a goal to an undiscovered floor tile
     if ((m_goalX == -1 && m_goalY == -1) || m_aimless == true){

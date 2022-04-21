@@ -174,21 +174,7 @@ int main(int argc, char *argv[]){
             }
             // remove collected treasure
             if(treasure_subset_indices.size() > 0)
-            {
-                std::vector<std::pair<int,int>> total;
-                for(int i = 0; i<sizey; i++)
-                {
-                    for(int j = 0; j<sizex; j++)
-                    {
-                        if(map.tiles[i][j] == TreasureTile)
-                            total.push_back(std::make_pair(j,i));
-                    }
-                }
-                if(total.size() != (map.treasures.size() - treasure_subset_indices.size()))
-                {
-                    int lll = 0;
-                    lll++;
-                }
+            {                
                 removeSubset(map.treasures, treasure_subset_indices);
             }
 
