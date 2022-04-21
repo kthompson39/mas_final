@@ -11,8 +11,8 @@
 
 using namespace std;
 
-const int sizex = 42; //Size of map
-const int sizey = 42;
+const int sizex = 32; //Size of map
+const int sizey = 32;
 
 class Map {
   public:

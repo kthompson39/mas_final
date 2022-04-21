@@ -52,7 +52,7 @@ int main(int argc, char *argv[]){
     {
         Map map(original_map);
         genColors(map, none_toggle);
-        auto agents = createAgents(20, 1,1, map);
+        auto agents = createAgents(5, 1,1, map);
 
         // holds current, ongoing auctions
         std::list<Auction> auctions;
@@ -82,7 +82,9 @@ int main(int argc, char *argv[]){
                     int d = 0;
                     for(int agentId: trap.agentsTrapped)
                     {
-                        agents[agentId].m_health -= TRAP_DAMAGE_PER_TICK;
+                        //Bandaid solution to dying after being saved...
+                        if(agents[agentId].m_stuck == true) 
+                            agents[agentId].m_health -= TRAP_DAMAGE_PER_TICK;
                         if(agents[agentId].m_health <= 0)
                         {
                             dead_agents_indices.push_back(d);
@@ -115,6 +117,7 @@ int main(int argc, char *argv[]){
 
                     // update map
                     map.tiles[trap.y][trap.x] = Floor;
+                    // map.word[trap.y][trap.x] = "  ";
                     updateTileColor(map, none_toggle, trap.y, trap.x);
                 }
                 k++;
@@ -150,6 +153,7 @@ int main(int argc, char *argv[]){
 
                         // update map
                         map.tiles[treasure.y][treasure.x] = Floor;
+                        // map.word[treasure.y][treasure.x] = "  ";
                         updateTileColor(map, none_toggle, treasure.y, treasure.x);
                     }
                 }
@@ -167,6 +171,7 @@ int main(int argc, char *argv[]){
                     treasure_subset_indices.push_back(k);
                     // update map
                     map.tiles[treasure.y][treasure.x] = Floor;
+                    // map.word[treasure.y][treasure.x] = "  ";
                     updateTileColor(map, none_toggle, treasure.y, treasure.x);
                 }
 

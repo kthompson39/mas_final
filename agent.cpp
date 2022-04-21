@@ -192,13 +192,6 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
     {
         while(m_treasureCount > 0){
             BFS_to_Undiscovered(m_y, m_x, true);
-
-            /*for (Agent& agent: agents){
-                agent.m_map.tiles[yi][xi] = TreasureTile;
-                agent.m_map.treasures.push_back(Treasure{xi,yi,1});
-                updateTileColor(agent.m_map, true, yi, xi);
-            }*/
-
             m_treasureCount--;
         }
     }
@@ -228,7 +221,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
         }
     }
 
-    int steal_treasure = 4;
+    int steal_treasure = 10;
     int notice_agents = 10; //distance of radius from which to notice other agents
 
     //If agent has no goal yet...set a goal to an undiscovered floor tile
@@ -237,6 +230,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
         int check_t = 0; //Count treasure tiles
         int check_d = 0; //Count tiles to discover
         int check_m = 0; //Count agents with treasures in order to mug
+        int check_s = 0; //Count agents in traps to save
 
         for (int x = 0; x < sizex; x++){
             for (int y = 0; y < sizey; y++){
@@ -252,19 +246,26 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                     float c = sqrt(a*a + b*b);
                     if(agent.m_health > 0 && agent.m_treasureCount > steal_treasure 
                         && m_id != agent.m_id && m_targetId == -1
-                        && c <= notice_agents) check_m++;
+                        && c <= notice_agents) 
+                        check_m++;
+
+                    if(agent.m_health > 0 && agent.m_stuck == true 
+                        && m_id != agent.m_id && m_targetId == -1) 
+                        check_s++;
                 }
+
 
             }
         }
 
         //Agents will explore by default. But will seek Treasure if any treasure lies in their discovered m_map array.
         std::string      agent_top_want = "Explore";
-        if (check_m > 0) agent_top_want = "Mug";
         if (check_t > 0) agent_top_want = "Treasure";
+        if (check_m > 0) agent_top_want = "Mug";
+        if (check_s > 0) agent_top_want = "Save";
 
-        if (check_t > 0 || check_d > 0 || check_m > 0){
-            int r_t = 0; int r_d = 0; int r_m = 0;
+        if (check_t > 0 || check_d > 0 || check_m > 0 || check_s > 0){
+            int r_t = 0; int r_d = 0; int r_m = 0; int r_s = 0;
             
             if (check_t > 0){
                 r_t = rand()%check_t; check_t = 0;
@@ -275,12 +276,15 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
             if (check_m > 0){
                 r_m = rand()%check_m; check_m = 0;
             }
+            if (check_s > 0){
+                r_s = rand()%check_s; check_s = 0;
+            }
 
             for (int x = 0; x < sizex; x++){
                 for (int y = 0; y < sizey; y++){
 
                     //Check for same conditions as above
-                    if (m_map.tiles[y][x] == TreasureTile && m_map.discovered[y][x] > .8 && agent_top_want == "Treasure"){
+                    if (agent_top_want == "Treasure" && m_map.tiles[y][x] == TreasureTile && m_map.discovered[y][x] > .8){
                         if (r_t == check_t){
                             m_goalX = x;
                             m_goalY = y;
@@ -297,25 +301,33 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                         }
                         check_d++;
                     }
-                    if (agent_top_want == "Mug"){
+                    for (Agent& agent: agents){
 
-                        for (Agent& agent: agents){
+                        float a = agent.m_x - m_x;
+                        float b = agent.m_y - m_y;
+                        float c = sqrt(a*a + b*b);
 
-                            float a = agent.m_x - m_x;
-                            float b = agent.m_y - m_y;
-                            float c = sqrt(a*a + b*b);
+                        if(agent_top_want == "Mug" && agent.m_health > 0 
+                            && agent.m_treasureCount > steal_treasure 
+                            && m_id != agent.m_id && m_targetId == -1
+                            && c <= notice_agents){
 
-                            if(agent.m_health > 0 && agent.m_treasureCount > steal_treasure 
-                                && m_id != agent.m_id && m_targetId == -1
-                                && c <= notice_agents){
-
-                                if (r_m == check_m){
-                                    m_targetId = agent.m_id;
-                                }
-                                check_m++;
+                            if (r_m == check_m){
+                                m_targetId = agent.m_id;
                             }
+                            check_m++;
+                        }
+                        if(agent_top_want == "Save" && agent.m_health > 0 
+                            && agent.m_stuck == true 
+                            && m_id != agent.m_id && m_targetId == -1){
+
+                            if (r_s == check_s){
+                                m_targetId = agent.m_id;
+                            }
+                            check_s++;
                         }
                     }
+                    
 
                 }
             }
@@ -326,10 +338,10 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
     }
 
 
-    ///////////MUGGING
     if (m_targetId != -1){ //Current target coordinate is another agent
         for (Agent& agent: agents)
         {
+            ///////////MUGGING
             if (agent.m_id == m_targetId){
                 m_goalX = agent.m_x; //Set goal coordinates to target agent coordinates
                 m_goalY = agent.m_y;
@@ -337,12 +349,44 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                 || (m_x+1 == m_goalX && m_y == m_goalY)
                 || (m_x-1 == m_goalX && m_y == m_goalY)
                 || (m_x == m_goalX && m_y+1 == m_goalY)
-                || (m_x == m_goalX && m_y-1 == m_goalY)){ //If arrive at agent, mug target
+                || (m_x == m_goalX && m_y-1 == m_goalY)
+                || (m_x+1 == m_goalX && m_y+1 == m_goalY) 
+                || (m_x+1 == m_goalX && m_y-1 == m_goalY) 
+                || (m_x-1 == m_goalX && m_y+1 == m_goalY) 
+                || (m_x-1 == m_goalX && m_y-1 == m_goalY) ){ //If arrive at agent, mug target
 
-                    m_treasureCount += 1;
-                    agent.m_treasureCount -= 1;
-                    agent.m_health -= 10;
+                    if (agent.m_treasureCount > 0){ // && m_likableness[m_targetId] < 0){
+                        m_treasureCount += 1;
+                        agent.m_treasureCount -= 1;
+                        agent.m_health -= 1;
+                        m_targetId = -1;
+                    }
+                }
+            }
+            ///////////SAVE FROM TRAP
+            if (agent.m_id == m_targetId){
+                m_goalX = agent.m_x; //Set goal coordinates to target agent coordinates
+                m_goalY = agent.m_y;
+                if ((m_x == m_goalX && m_y == m_goalY) 
+                || (m_x+1 == m_goalX && m_y == m_goalY)
+                || (m_x-1 == m_goalX && m_y == m_goalY)
+                || (m_x == m_goalX && m_y+1 == m_goalY)
+                || (m_x == m_goalX && m_y-1 == m_goalY)
+                || (m_x+1 == m_goalX && m_y+1 == m_goalY) 
+                || (m_x+1 == m_goalX && m_y-1 == m_goalY) 
+                || (m_x-1 == m_goalX && m_y+1 == m_goalY) 
+                || (m_x-1 == m_goalX && m_y-1 == m_goalY) ){ //If arrive at agent, mug target
+
+                    m_global_map.tiles[agent.m_y][agent.m_x] = Floor;
+                    updateTileColor(m_global_map, false, agent.m_y,agent.m_x);
+
+                    agent.m_stuck = false;
+                    agent.m_x = m_x;
+                    agent.m_y = m_y;
                     m_targetId = -1;
+
+                    agent.m_health+=10;
+
                 }
             }
         }
