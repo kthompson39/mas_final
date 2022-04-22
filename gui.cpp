@@ -86,6 +86,22 @@ string chooseWall(Map& map, enum category c, int y, int x, int rando){
 
 void updateTileColor(Map& map, bool none_toggle, int y, int x)
 {
+    // display onTop items
+    if(map.onTop[y][x] == TreasureTile){ 
+        map.word[y][x] = "$$"; 
+        map.blocks[y][x] = 0;
+        rgb(map, y,x, 255,180,1,  200,130,1);
+        return;
+    }
+    else if (map.onTop[y][x] == TrapTile){ 
+        map.word[y][x] = "^^"; 
+        map.blocks[y][x] = 0;
+        int s = rand()%15;
+        rgb(map, y,x, 255,50,50,  200-s,50-s,50-s);
+        return;
+    }
+
+    // if no onTop item, display normal tiles
     int f = 15;
     if (map.tiles[y][x] == None){
         map.blocks[y][x] = none_toggle; //Blocks is TRUE after generating Hallways

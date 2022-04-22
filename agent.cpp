@@ -55,6 +55,7 @@ int Agent::updateInternalMap(Map& fullMap)
             }
 
             m_map.tiles[y][x] = m_global_map.tiles[y][x];
+            m_map.onTop[y][x] = m_global_map.onTop[y][x];
         }
     }
     return discovered;
@@ -130,13 +131,13 @@ int Agent::BFS_to_Undiscovered(int y, int x, bool option){
                 a = 1;
                 break;
             }
-            if (m_global_map.tiles[j][i] != TreasureTile
+            if (m_global_map.onTop[j][i] != TreasureTile
                 && (j == m_y && i == m_x)==false && option == true){ 
                 //Place a new treasure after agent perishes
                 int yi = leaves[mm].L;
                 int xi = leaves[mm].R;
 
-                m_global_map.tiles[yi][xi] = TreasureTile;
+                m_global_map.onTop[yi][xi] = TreasureTile;
                 m_global_map.treasures.push_back(Treasure{xi,yi,1});
                 updateTileColor(m_global_map, true, yi, xi);
 
@@ -202,18 +203,23 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
     }
 
     // if agent is collecting treasure, continue collecting treasure
-    if(m_collectStep > -1)
+    if(m_collectStep > -1 && m_map.onTop[m_y][m_x] == TreasureTile)
     {
         m_collectStep++;
         return;
     }
+    //else
+    //{
+    //    m_collectStep = -1;
+    //}
 
 
     if (m_goalX == m_x && m_goalY == m_y){
         // if agent is on treasure, start collecting it
-        if(m_map.tiles[m_y][m_x] == TreasureTile)
+        if(m_map.onTop[m_y][m_x] == TreasureTile)
         {
             m_collectStep = 0;
+            //return;
         }
         else
         {
@@ -236,7 +242,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
             for (int y = 0; y < sizey; y++){
 
                 //Various conditions to search for
-                if (m_map.tiles[y][x] == TreasureTile && m_map.discovered[y][x] > .8) check_t++;
+                if (m_map.onTop[y][x] == TreasureTile && m_map.discovered[y][x] > .8) check_t++;
                 if (isTileOccupiable(x, y, m_map) && m_map.discovered[y][x] < .8) check_d++;
             
 
@@ -284,7 +290,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                 for (int y = 0; y < sizey; y++){
 
                     //Check for same conditions as above
-                    if (agent_top_want == "Treasure" && m_map.tiles[y][x] == TreasureTile && m_map.discovered[y][x] > .8){
+                    if (agent_top_want == "Treasure" && m_map.onTop[y][x] == TreasureTile && m_map.discovered[y][x] > .8){
                         if (r_t == check_t){
                             m_goalX = x;
                             m_goalY = y;
@@ -377,7 +383,8 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                 || (m_x-1 == m_goalX && m_y+1 == m_goalY) 
                 || (m_x-1 == m_goalX && m_y-1 == m_goalY) ){ //If arrive at agent, mug target
 
-                    m_global_map.tiles[agent.m_y][agent.m_x] = Floor;
+                    //m_global_map.tiles[agent.m_y][agent.m_x] = Floor;
+                    m_global_map.onTop[agent.m_y][agent.m_x] = None;
                     updateTileColor(m_global_map, false, agent.m_y,agent.m_x);
 
                     agent.m_stuck = false;

@@ -116,7 +116,7 @@ int main(int argc, char *argv[]){
                     trap_subset_indices.push_back(k);
 
                     // update map
-                    map.tiles[trap.y][trap.x] = Floor;
+                    map.onTop[trap.y][trap.x] = None;
                     // map.word[trap.y][trap.x] = "  ";
                     updateTileColor(map, none_toggle, trap.y, trap.x);
                 }
@@ -152,7 +152,7 @@ int main(int argc, char *argv[]){
                         agents[i].m_treasureCount += treasure.value;
 
                         // update map
-                        map.tiles[treasure.y][treasure.x] = Floor;
+                        map.onTop[treasure.y][treasure.x] = None;
                         // map.word[treasure.y][treasure.x] = "  ";
                         updateTileColor(map, none_toggle, treasure.y, treasure.x);
                     }
@@ -170,7 +170,7 @@ int main(int argc, char *argv[]){
                     // remove treasure from treasure list since its now in an auction
                     treasure_subset_indices.push_back(k);
                     // update map
-                    map.tiles[treasure.y][treasure.x] = Floor;
+                    map.onTop[treasure.y][treasure.x] = None;
                     // map.word[treasure.y][treasure.x] = "  ";
                     updateTileColor(map, none_toggle, treasure.y, treasure.x);
                 }
@@ -182,6 +182,7 @@ int main(int argc, char *argv[]){
             {                
                 removeSubset(map.treasures, treasure_subset_indices);
             }
+            map.updateOnTop();
 
 
             /////////////////////////////////////////////////////////

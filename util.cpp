@@ -7,6 +7,7 @@ void genRandom(Map& map){
     for (int y = 0; y < sizey; y++){
         for (int x = 0; x < sizex; x++){
             map.tiles[y][x] = None;
+            map.onTop[y][x] = None;
             map.blocks[y][x] = 0;
             map.word[y][x] = "  ";
             map.discovered[y][x] = 0.2;
@@ -53,13 +54,13 @@ void genRandom(Map& map){
 
                     for(auto& t: treasure_locations)
                     {
-                        map.tiles[t.y][t.x] = TreasureTile;
+                        map.onTop[t.y][t.x] = TreasureTile;
                         map.treasures.push_back(Treasure{t.x,t.y,1});
                     }
 
                     for(auto& t: trap_locations)
                     {
-                        map.tiles[t.y][t.x] = TrapTile;
+                        map.onTop[t.y][t.x] = TrapTile;
                         map.traps.push_back(Trap{t.x,t.y, false, std::vector<int>{}});
                     }
 

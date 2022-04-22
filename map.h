@@ -18,8 +18,10 @@ class Map {
   public:
     Map();
     Map(const Map&);
+    void updateOnTop();
 
     enum category tiles[sizey][sizex];
+    enum category onTop[sizey][sizex];
     string word[sizey][sizex];
     int f_r[sizey][sizex]; //foreground_red
     int f_g[sizey][sizex]; //foreground_green

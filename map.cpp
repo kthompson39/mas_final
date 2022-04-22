@@ -19,6 +19,7 @@ Map::Map()
 Map::Map(const Map& map)
 {
     copyVector(map.discovered, this->discovered);
+    copyVector(map.onTop, this->onTop);
     copyVector(map.tiles, this->tiles);
     copyVector(map.blocks, this->blocks);
 
@@ -36,5 +37,24 @@ Map::Map(const Map& map)
     this->rooms = std::vector<Room>(map.rooms);
     this->treasures = std::list<Treasure>(map.treasures);
     this->traps = std::list<Trap>(map.traps);
+}
+
+void Map::updateOnTop()
+{
+    for(int y =0; y < sizey; y++)
+    {
+        for(int x =0; x < sizey; x++)
+        {
+            onTop[y][x] = None;
+        }
+    }
+    for(Treasure& treasure: treasures)
+    {
+        onTop[treasure.y][treasure.x] = TreasureTile;
+    }
+    for(Trap& trap: traps)
+    {
+        onTop[trap.y][trap.x] = TrapTile;
+    }
 }
 
