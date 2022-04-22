@@ -38,7 +38,7 @@ void removeSubset(Container& fullList, std::vector<int> subset)
     for (auto itr = fullList.cbegin(); itr != fullList.end(); itr++)
     {
         // remove items that are in the subset
-        if (i == subset[j]) {
+        if (i == subset[j] && j < subset.size()) {
             fullList.erase(itr--);
             j++;
         }
