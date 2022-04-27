@@ -52,7 +52,7 @@ int main(int argc, char *argv[]){
     {
         Map map(original_map);
         genColors(map, none_toggle);
-        auto agents = createAgents(5, 1,1, map);
+        auto agents = createAgents(6, 1,1, map);
 
         // holds current, ongoing auctions
         std::list<Auction> auctions;
@@ -248,11 +248,19 @@ int main(int argc, char *argv[]){
                     {
                         std::string agent_name = std::to_string(agentOnTile) + " ";
 
-                        if (agents[agentOnTile].m_health > 0)
-                            printT(i*2,j, agent_name ,0,0,0,  200*v,200*v,1);
-                        else
-                            printT(i*2,j, agent_name ,0,0,0,  200*v,1,1);
-
+                        if (agents[agentOnTile].m_health > 0){
+                            if (agents[agentOnTile].m_hurt <= 0)
+                            {
+                                printT(i*2,j, agent_name ,0,0,0,  200*v,200*v,1);
+                            }
+                            else
+                            {
+                                agents[agentOnTile].m_hurt--;
+                                printT(i*2,j, agent_name ,255*v,0,0,  200*v,200*v,1);
+                            }
+                        }else{
+                            printT(i*2,j, agent_name ,255*v,0,0,  150*v,1,1);
+                        }
 
                     }
                     else{ //Display Tile

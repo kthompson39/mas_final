@@ -27,6 +27,8 @@ public:
     Map m_map;
     Map& m_global_map;
 
+    int m_hurt = 0;
+    int m_team = -1;
     bool m_aimless = false;
     int m_collectStep = -1;
     bool m_stuck = false;

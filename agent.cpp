@@ -189,6 +189,11 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
 {
     updateInternalMap(map);
 
+    if(m_team == -1) //agent currently has no team
+    {
+        m_team = m_id % 2; //make 2 teams
+    }
+
     if(m_health <= 0)
     {
         while(m_treasureCount > 0){
@@ -227,8 +232,22 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
         }
     }
 
-    int steal_treasure = 10;
-    int notice_agents = 10; //distance of radius from which to notice other agents
+    int steal_treasure = 5; //agents mug after this many treasures
+    int notice_agents = 8; //radius from which to notice other agents
+    int team_distance = 4; //radius by which teams must stay together
+
+    for (Agent& agent: agents){ //If target agent is dead, find new goal
+        if (agent.m_id == m_targetId && agent.m_health <= 0){
+            m_aimless = true;
+            m_targetId = -1;
+        }
+
+        if (agent.m_team == m_team){ //ensure teams are close
+            float a = agent.m_x - m_x;
+            float b = agent.m_y - m_y;
+            float c = sqrt(a*a + b*b);
+        }
+    }
 
     //If agent has no goal yet...set a goal to an undiscovered floor tile
     if ((m_goalX == -1 && m_goalY == -1) || m_aimless == true){
@@ -359,13 +378,15 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                 || (m_x+1 == m_goalX && m_y+1 == m_goalY) 
                 || (m_x+1 == m_goalX && m_y-1 == m_goalY) 
                 || (m_x-1 == m_goalX && m_y+1 == m_goalY) 
-                || (m_x-1 == m_goalX && m_y-1 == m_goalY) ){ //If arrive at agent, mug target
+                || (m_x-1 == m_goalX && m_y-1 == m_goalY) ){
 
                     if (agent.m_treasureCount > 0){ // && m_likableness[m_targetId] < 0){
                         m_treasureCount += 1;
                         agent.m_treasureCount -= 1;
                         agent.m_health -= 1;
+                        agent.m_hurt = 10;
                         m_targetId = -1;
+                        m_aimless = true;
                     }
                 }
             }
@@ -381,7 +402,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                 || (m_x+1 == m_goalX && m_y+1 == m_goalY) 
                 || (m_x+1 == m_goalX && m_y-1 == m_goalY) 
                 || (m_x-1 == m_goalX && m_y+1 == m_goalY) 
-                || (m_x-1 == m_goalX && m_y-1 == m_goalY) ){ //If arrive at agent, mug target
+                || (m_x-1 == m_goalX && m_y-1 == m_goalY) ){
 
                     //m_global_map.tiles[agent.m_y][agent.m_x] = Floor;
                     m_global_map.onTop[agent.m_y][agent.m_x] = None;
@@ -391,9 +412,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                     agent.m_x = m_x;
                     agent.m_y = m_y;
                     m_targetId = -1;
-
-                    agent.m_health+=10;
-
+                    m_aimless = true;
                 }
             }
         }
