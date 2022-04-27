@@ -286,7 +286,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                     if (agent.m_team == m_team) same_team = 3; 
 
                     if(agent.m_health > 0 
-                        && agent.m_treasureCount > (steal_treasure*same_team) 
+                        && agent.m_treasureCount-m_treasureCount > (steal_treasure*same_team) 
                         && m_id != agent.m_id 
                         && m_targetId == -1
                         && c <= notice_agents) 
@@ -355,7 +355,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                         if (agent.m_team == m_team) same_team = 3;
 
                         if(agent_top_want == "Mug" && agent.m_health > 0 
-                            && agent.m_treasureCount > (steal_treasure*same_team) 
+                            && agent.m_treasureCount-m_treasureCount > (steal_treasure*same_team) 
                             && m_id != agent.m_id && m_targetId == -1
                             && c <= notice_agents){
 
