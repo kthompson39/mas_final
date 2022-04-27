@@ -27,13 +27,14 @@ public:
     Map m_map;
     Map& m_global_map;
 
+    bool m_gone = false;
     int m_hurt = 0;
     int m_team = -1;
     bool m_aimless = false;
     int m_collectStep = -1;
     bool m_stuck = false;
     bool m_inAuction = false;
-    int m_health = INITIAL_AGENT_HEALTH_VALUE * 4;
+    int m_health = INITIAL_AGENT_HEALTH_VALUE;
     int m_id = -1;
     int m_targetId = -1;
 };

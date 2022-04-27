@@ -15,6 +15,7 @@ int camy = py;
 int ch; //Global char input
 int turns = 0;
 bool none_toggle = false;
+bool stop_program = false;
 
 
 int main(int argc, char *argv[]){
@@ -48,11 +49,12 @@ int main(int argc, char *argv[]){
     //px = map.rooms[0].lowerx-2; //Set user to coordinates of room[0]
     //py = map.rooms[0].lowery-2;
 
+
     while(1)
     {
         Map map(original_map);
         genColors(map, none_toggle);
-        auto agents = createAgents(6, 1,1, map);
+        auto agents = createAgents(8, 1,1, map);
 
         // holds current, ongoing auctions
         std::list<Auction> auctions;
@@ -223,7 +225,8 @@ int main(int argc, char *argv[]){
                     }
 
                     //Refresh Display Tile
-                    float v = 0.3;
+                    float v = 0.4;
+                    bool end = true;
                     for (Agent& agent: agents)
                     {
                         if (agent.m_health > 0){
@@ -231,8 +234,13 @@ int main(int argc, char *argv[]){
                             px = agent.m_x; 
                             py = agent.m_y; //Causes camera to follow this agent
                             if (v < .8) v = .4;
+                            if (agent.m_gone == false) end = false;
                         }
                     }
+                    if (end){ 
+                        stop_program = true;
+                    }
+
                     if (show_all_map)
                         v = 1; //Uncomment for complete brightness 
 
@@ -244,21 +252,39 @@ int main(int argc, char *argv[]){
                         // printT(i*2,j, "Al" ,255,255,1,  200,200,1);
                     }
 
-                    if(agentOnTile > -1)
+                    if(agentOnTile > -1 && agents[agentOnTile].m_gone == false)
                     {
                         std::string agent_name = std::to_string(agentOnTile) + " ";
 
                         if (agents[agentOnTile].m_health > 0){
+                            //Colors based on teams
+                            int ra, rb, rc;
+                            ra = rb = rc = 155;
+                            if (int(agents[agentOnTile].m_team == 0)){ra = 0; rb = 255; rc = 255; }
+                            if (int(agents[agentOnTile].m_team == 1)){ra = 0; rb = 0; rc = 255; }
+                            if (int(agents[agentOnTile].m_team == 2)){ra = 0; rb = 255; rc = 0; }
+                            if (int(agents[agentOnTile].m_team == 3)){ra = 255; rb = 255; rc = 255; }
+                            if (int(agents[agentOnTile].m_team == 4)){ra = 255; rb = 0; rc = 255; }
+                            if (int(agents[agentOnTile].m_team == 5)){ra = 255; rb = 255; rc = 0; }
+                            if (int(agents[agentOnTile].m_team >= 6)){
+                                ra = int(agents[agentOnTile].m_team)*96%255; 
+                                rb = int(agents[agentOnTile].m_team)*165%255;
+                                rc = int(agents[agentOnTile].m_team)*1287%255; 
+                            }
+                            ra *= v; rb *= v; rc *= v;
                             if (agents[agentOnTile].m_hurt <= 0)
                             {
-                                printT(i*2,j, agent_name ,0,0,0,  200*v,200*v,1);
+                                //Regular alive color
+                                printT(i*2,j, agent_name ,0,0,0, ra,rb,rc);
                             }
                             else
                             {
+                                //alive with red font
                                 agents[agentOnTile].m_hurt--;
-                                printT(i*2,j, agent_name ,255*v,0,0,  200*v,200*v,1);
+                                printT(i*2,j, agent_name ,255*v,0,0, ra,rb,rc);
                             }
                         }else{
+                            //Totally red background and font
                             printT(i*2,j, agent_name ,255*v,0,0,  150*v,1,1);
                         }
 
@@ -329,9 +355,30 @@ int main(int argc, char *argv[]){
             if (camx > sizex-COLS/4) camx = sizex-COLS/4;
             if (camy > sizey-LINES/2) camy = sizey-LINES/2;
 
+            if (stop_program) break;
         }
+        if (stop_program){
+            //Print end output of all agent stats
+            endwin();
+            gotoxy(0,0);
+            system("clear");
+            int win = -1;
+            int winner = -1;
+            printf("%-8s | %-5s | %-10s | %-5s (%d) \n", "Agent ID", "Team", "Treasures", "Health", INITIAL_AGENT_HEALTH_VALUE);
+            for (Agent& agent: agents)
+            {
+                if (agent.m_health < 0) agent.m_health = 0; //Prevent negative health
+                printf("%-8d | %-5d | %-10d | %-5d \n", agent.m_id, agent.m_team, agent.m_treasureCount, agent.m_health);
+                if (agent.m_treasureCount > win){
+                    win = agent.m_treasureCount;
+                    winner = agent.m_id;
+                }
+            }
+            printf("\nWinner: %d \n", winner);
+            break;
+        }
+
     }
 
-    endwin();
 }
 

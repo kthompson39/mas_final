@@ -184,14 +184,14 @@ int Agent::BFS_to_Undiscovered(int y, int x, bool option){
     return 0;
 }
 
-
 void Agent::step(std::vector<Agent>& agents, Map& map)
 {
     updateInternalMap(map);
 
     if(m_team == -1) //agent currently has no team
     {
-        m_team = m_id % 2; //make 2 teams
+        m_team = (m_id % 2)+5; //initialize with 2 teams. +5 so color begins at yellow
+        m_team = m_id;
     }
 
     if(m_health <= 0)
@@ -202,7 +202,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
         }
     }
 
-    if(m_stuck || m_inAuction || m_health <= 0)
+    if(m_stuck || m_inAuction || m_health <= 0 || m_gone)
     {
         return;
     }
@@ -218,6 +218,10 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
     //    m_collectStep = -1;
     //}
 
+    if (m_goalX <= 1 && m_goalY <= 1 && m_x <= 1 && m_y <= 1){
+        m_gone = true;
+        return;
+    }
 
     if (m_goalX == m_x && m_goalY == m_y){
         // if agent is on treasure, start collecting it
@@ -234,7 +238,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
 
     int steal_treasure = 5; //agents mug after this many treasures
     int notice_agents = 8; //radius from which to notice other agents
-    int team_distance = 4; //radius by which teams must stay together
+    int team_distance = 5; //radius by which teams must stay together
 
     for (Agent& agent: agents){ //If target agent is dead, find new goal
         if (agent.m_id == m_targetId && agent.m_health <= 0){
@@ -242,10 +246,20 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
             m_targetId = -1;
         }
 
-        if (agent.m_team == m_team){ //ensure teams are close
+        //ensure teams are close
+        if (agent.m_team == m_team && agent.m_health > 0 
+            && agent.m_id != m_id && agent.m_stuck == false
+            && agent.m_id < m_id && agent.m_gone == false){ 
             float a = agent.m_x - m_x;
             float b = agent.m_y - m_y;
             float c = sqrt(a*a + b*b);
+            if (c > team_distance){ 
+                m_goalX = agent.m_goalX;
+                m_goalY = agent.m_goalY;
+                // m_aimless = false;
+                // m_targetId = agent.m_targetId;
+                // break;
+            }
         }
     }
 
@@ -264,18 +278,22 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                 if (m_map.onTop[y][x] == TreasureTile && m_map.discovered[y][x] > .8) check_t++;
                 if (isTileOccupiable(x, y, m_map) && m_map.discovered[y][x] < .8) check_d++;
             
-
                 for (Agent& agent: agents){
                     float a = agent.m_x - m_x;
                     float b = agent.m_y - m_y;
                     float c = sqrt(a*a + b*b);
-                    if(agent.m_health > 0 && agent.m_treasureCount > steal_treasure 
-                        && m_id != agent.m_id && m_targetId == -1
-                        && c <= notice_agents) 
+                    if(agent.m_health > 0 
+                        && agent.m_treasureCount > steal_treasure 
+                        && m_id != agent.m_id 
+                        && m_targetId == -1
+                        && c <= notice_agents
+                        && m_team != agent.m_team) 
                         check_m++;
 
-                    if(agent.m_health > 0 && agent.m_stuck == true 
-                        && m_id != agent.m_id && m_targetId == -1) 
+                    if(agent.m_health > 0 
+                        && agent.m_stuck == true 
+                        && m_id != agent.m_id 
+                        && m_targetId == -1) 
                         check_s++;
                 }
 
@@ -335,7 +353,8 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                         if(agent_top_want == "Mug" && agent.m_health > 0 
                             && agent.m_treasureCount > steal_treasure 
                             && m_id != agent.m_id && m_targetId == -1
-                            && c <= notice_agents){
+                            && c <= notice_agents
+                            && m_team != agent.m_team){
 
                             if (r_m == check_m){
                                 m_targetId = agent.m_id;
@@ -381,10 +400,13 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                 || (m_x-1 == m_goalX && m_y-1 == m_goalY) ){
 
                     if (agent.m_treasureCount > 0){ // && m_likableness[m_targetId] < 0){
-                        m_treasureCount += 1;
                         agent.m_treasureCount -= 1;
                         agent.m_health -= 1;
-                        agent.m_hurt = 10;
+                        agent.m_hurt = 10; //Font will appear red for 10 time steps
+                        if (m_team == agent.m_team) 
+                            agent.m_team = rand()%1000; //Hurt agent takes new team if both on same team
+
+                        m_treasureCount += 1;
                         m_targetId = -1;
                         m_aimless = true;
                     }
@@ -411,6 +433,8 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                     agent.m_stuck = false;
                     agent.m_x = m_x;
                     agent.m_y = m_y;
+                    agent.m_team = m_team; //Bring over to new team if saved
+
                     m_targetId = -1;
                     m_aimless = true;
                 }
