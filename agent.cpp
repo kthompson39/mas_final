@@ -236,7 +236,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
         }
     }
 
-    int steal_treasure = 5; //agents mug after this many treasures
+    int steal_treasure = 4; //agents mug after this many treasures
     int notice_agents = 8; //radius from which to notice other agents
     int team_distance = 5; //radius by which teams must stay together
 
@@ -282,12 +282,14 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                     float a = agent.m_x - m_x;
                     float b = agent.m_y - m_y;
                     float c = sqrt(a*a + b*b);
+                    int same_team = 1; //Agents less likely to steal from own team
+                    if (agent.m_team == m_team) same_team = 3; 
+
                     if(agent.m_health > 0 
-                        && agent.m_treasureCount > steal_treasure 
+                        && agent.m_treasureCount > (steal_treasure*same_team) 
                         && m_id != agent.m_id 
                         && m_targetId == -1
-                        && c <= notice_agents
-                        && m_team != agent.m_team) 
+                        && c <= notice_agents) 
                         check_m++;
 
                     if(agent.m_health > 0 
@@ -349,12 +351,13 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                         float a = agent.m_x - m_x;
                         float b = agent.m_y - m_y;
                         float c = sqrt(a*a + b*b);
+                        int same_team = 1;
+                        if (agent.m_team == m_team) same_team = 3;
 
                         if(agent_top_want == "Mug" && agent.m_health > 0 
-                            && agent.m_treasureCount > steal_treasure 
+                            && agent.m_treasureCount > (steal_treasure*same_team) 
                             && m_id != agent.m_id && m_targetId == -1
-                            && c <= notice_agents
-                            && m_team != agent.m_team){
+                            && c <= notice_agents){
 
                             if (r_m == check_m){
                                 m_targetId = agent.m_id;
@@ -404,7 +407,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                         agent.m_health -= 1;
                         agent.m_hurt = 10; //Font will appear red for 10 time steps
                         if (m_team == agent.m_team) 
-                            agent.m_team = rand()%1000; //Hurt agent takes new team if both on same team
+                            m_team = rand()%1000; //Attacking agent takes new team if both on same team
 
                         m_treasureCount += 1;
                         m_targetId = -1;
