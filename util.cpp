@@ -90,7 +90,7 @@ std::list<Location> genTreasure(Room& room)
     int area = (room.room_w - 1) * (room.room_h - 1);
     // generate [1,MAX_TREASURE], but accomodate for
     // size of the room
-    int treasure_limit = std::min(std::max(1,area / 4), MAX_TREASURES_PER_ROOM);
+    int treasure_limit = std::min(std::max(1,area / 2), MAX_TREASURES_PER_ROOM);
 
     int treasure_count = rand() % treasure_limit;
 

@@ -190,8 +190,9 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
 
     if(m_team == -1) //agent currently has no team
     {
-        m_team = (m_id % 2)+5; //initialize with 2 teams. +5 so color begins at yellow
+        // m_team = (m_id % 2)+5; //initialize with 2 teams. +5 so color begins at yellow
         m_team = m_id;
+        // m_team = 5; 
     }
 
     if(m_health <= 0)
@@ -218,7 +219,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
     //    m_collectStep = -1;
     //}
 
-    if (m_goalX <= 1 && m_goalY <= 1 && m_x <= 1 && m_y <= 1){
+    if (m_goalX == 1 && m_goalY == 1 && m_x <= 1 && m_y <= 1){
         m_gone = true;
         return;
     }
@@ -233,16 +234,14 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
         else
         {
             m_aimless = true; //Agent no longer has a goal
+            m_desireToMug = false; //Agent no longer attempting to mug someone
         }
     }
-
-    int steal_treasure = 4; //agents mug after this many treasures
-    int notice_agents = 8; //radius from which to notice other agents
-    int team_distance = 5; //radius by which teams must stay together
 
     for (Agent& agent: agents){ //If target agent is dead, find new goal
         if (agent.m_id == m_targetId && agent.m_health <= 0){
             m_aimless = true;
+            m_desireToMug = false;
             m_targetId = -1;
         }
 
@@ -253,12 +252,12 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
             float a = agent.m_x - m_x;
             float b = agent.m_y - m_y;
             float c = sqrt(a*a + b*b);
-            if (c > team_distance){ 
+            if (c > TEAM_CLOSENESS){ 
                 m_goalX = agent.m_goalX;
                 m_goalY = agent.m_goalY;
-                // m_aimless = false;
-                // m_targetId = agent.m_targetId;
-                // break;
+                m_aimless = false;
+                m_desireToMug = agent.m_desireToMug; 
+                m_targetId = agent.m_targetId; //Agents in group all will want to mug same agent
             }
         }
     }
@@ -283,19 +282,25 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                     float b = agent.m_y - m_y;
                     float c = sqrt(a*a + b*b);
                     int same_team = 1; //Agents less likely to steal from own team
-                    if (agent.m_team == m_team) same_team = 3; 
+                    if (agent.m_team == m_team) same_team = SAME_TEAM_BONUS; 
 
+                    //CHECK IF AGENT WORTH MUGGING
                     if(agent.m_health > 0 
-                        && agent.m_treasureCount-m_treasureCount > (steal_treasure*same_team) 
+                        //If prefer not to check for 2 agents treasure difference...
+                        && agent.m_treasureCount > (MUG_THRESHOLD*same_team) 
+                        // && agent.m_treasureCount-m_treasureCount > (MUG_THRESHOLD*same_team) 
                         && m_id != agent.m_id 
                         && m_targetId == -1
-                        && c <= notice_agents) 
+                        && c <= NOTICE_AGENTS_DISTANCE) 
+
                         check_m++;
 
+                    //CHECK IF AGENT WORTH SAVING
                     if(agent.m_health > 0 
                         && agent.m_stuck == true 
                         && m_id != agent.m_id 
                         && m_targetId == -1) 
+
                         check_s++;
                 }
 
@@ -352,19 +357,26 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                         float b = agent.m_y - m_y;
                         float c = sqrt(a*a + b*b);
                         int same_team = 1;
-                        if (agent.m_team == m_team) same_team = 3;
+                        if (agent.m_team == m_team) same_team = SAME_TEAM_BONUS;
 
-                        if(agent_top_want == "Mug" && agent.m_health > 0 
-                            && agent.m_treasureCount-m_treasureCount > (steal_treasure*same_team) 
+                        //CHECK IF AGENT WORTH MUGGING (AGAIN)
+                        if(agent_top_want == "Mug" 
+                            && agent.m_health > 0 
+                            //If prefer not to check for 2 agents treasure difference...
+                            && agent.m_treasureCount > (MUG_THRESHOLD*same_team) 
+                            // && agent.m_treasureCount-m_treasureCount > (MUG_THRESHOLD*same_team) 
                             && m_id != agent.m_id && m_targetId == -1
-                            && c <= notice_agents){
+                            && c <= NOTICE_AGENTS_DISTANCE){
 
                             if (r_m == check_m){
                                 m_targetId = agent.m_id;
+                                m_desireToMug = true;
                             }
                             check_m++;
                         }
-                        if(agent_top_want == "Save" && agent.m_health > 0 
+                        //CHECK IF AGENT WORTH SAVING (AGAIN)
+                        if(agent_top_want == "Save" 
+                            && agent.m_health > 0 
                             && agent.m_stuck == true 
                             && m_id != agent.m_id && m_targetId == -1){
 
@@ -389,7 +401,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
         for (Agent& agent: agents)
         {
             ///////////MUGGING
-            if (agent.m_id == m_targetId){
+            if (agent.m_id == m_targetId && m_desireToMug == true){
                 m_goalX = agent.m_x; //Set goal coordinates to target agent coordinates
                 m_goalY = agent.m_y;
                 if ((m_x == m_goalX && m_y == m_goalY) 
@@ -412,6 +424,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                         m_treasureCount += 1;
                         m_targetId = -1;
                         m_aimless = true;
+                        m_desireToMug = false;
                     }
                 }
             }

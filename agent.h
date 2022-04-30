@@ -37,4 +37,5 @@ public:
     int m_health = INITIAL_AGENT_HEALTH_VALUE;
     int m_id = -1;
     int m_targetId = -1;
+    bool m_desireToMug = false;
 };
