@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <map>
 #include "map.h"
 #include "definitions.h"
 
@@ -15,11 +16,13 @@ public:
     void joinAuction();
     void leaveAuction();
     bool bid(int askingPrice, std::vector<int> agentsInAuction);
+    void joinAgentsTeam(Agent& agent);
+    bool isWillingToChangeToAgentsTeams(Agent& agent, std::map<int,float> allMeanTeamLikableness, std::map<int,int> allHighestTeamLikablenessValues);
     
     int m_x = -1;
     int m_y = -1;
     int m_treasureCount = 0;
-    std::vector<int> m_likableness;
+    std::vector<long int> m_likableness;
 
     int m_goalX = -1;
     int m_goalY = -1;

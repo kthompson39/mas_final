@@ -271,6 +271,13 @@ int main(int argc, char *argv[]){
                                 rb = int(agents[agentOnTile].m_team)*165%255;
                                 rc = int(agents[agentOnTile].m_team)*1287%255; 
                             }
+                            if (int(agents[agentOnTile].m_team == NO_TEAM))
+                            {
+                                int scalar = rand()%1000;
+                                ra = scalar*96%255; 
+                                rb = scalar*165%255;
+                                rc = scalar*1287%255; 
+                            }
                             ra *= v; rb *= v; rc *= v;
                             if (agents[agentOnTile].m_hurt <= 0)
                             {
@@ -373,6 +380,12 @@ int main(int argc, char *argv[]){
                     win = agent.m_treasureCount;
                     winner = agent.m_id;
                 }
+            }
+            for (Agent& agent: agents)
+            {
+                for(size_t i = 0; i < agent.m_likableness.size(); i++)
+                    printf("|%-3d ", agent.m_likableness[i]);
+                printf("|\n");
             }
             printf("\nWinner: %d \n", winner);
             break;

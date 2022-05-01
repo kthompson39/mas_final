@@ -5,7 +5,7 @@
 #include "definitions.h"
 
 Agent::Agent(int startX, int startY, int numOtherAgents, Map& map, int id) :
-    m_x(startX), m_y(startY), m_likableness(std::vector<int>(numOtherAgents, INITIAL_LIKABLENESS_VALUE)), 
+    m_x(startX), m_y(startY), m_likableness(std::vector<long int>(numOtherAgents, INITIAL_LIKABLENESS_VALUE)), 
     m_map(Map(map)), m_global_map(map), m_id(id)
 {
 }
@@ -27,6 +27,22 @@ bool Agent::bid(int askingPrice, std::vector<int> agentsInAuction)
 {
     //TODO implement agent bidding in auctions
     return rand()%2;
+}
+
+bool Agent::isWillingToChangeToAgentsTeams(Agent& agent, std::map<int,float> allMeanTeamLikableness, std::map<int,int> allHighestTeamLikablenessValues)
+{
+    if(agent.m_team == NO_TEAM || agent.m_id == m_id)
+        return false;
+
+    if(m_likableness[agent.m_id] > JOIN_TEAM_THREASHOLD
+       && m_likableness[agent.m_id] > allHighestTeamLikablenessValues[m_team] 
+       && allMeanTeamLikableness[agent.m_team] > allMeanTeamLikableness[m_team]
+      )
+    {
+        return true;
+    }
+
+    return false;
 }
 
 int Agent::updateInternalMap(Map& fullMap)
@@ -184,6 +200,17 @@ int Agent::BFS_to_Undiscovered(int y, int x, bool option){
     return 0;
 }
 
+void Agent::joinAgentsTeam(Agent& agent)
+{
+    // create new team
+    if(agent.m_team == NO_TEAM)
+    {
+        agent.m_team = rand()%1000;
+    }
+
+    m_team = agent.m_team;
+}
+
 void Agent::step(std::vector<Agent>& agents, Map& map)
 {
     updateInternalMap(map);
@@ -238,6 +265,10 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
         }
     }
 
+    int steal_treasure = 4; //agents mug after this many treasures
+    int notice_agents = 2; //radius from which to notice other agents
+    int team_distance = 5; //radius by which teams must stay together
+
     for (Agent& agent: agents){ //If target agent is dead, find new goal
         if (agent.m_id == m_targetId && agent.m_health <= 0){
             m_aimless = true;
@@ -246,7 +277,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
         }
 
         //ensure teams are close
-        if (agent.m_team == m_team && agent.m_health > 0 
+        if (agent.m_team == m_team && m_team != NO_TEAM && agent.m_health > 0 
             && agent.m_id != m_id && agent.m_stuck == false
             && agent.m_id < m_id && agent.m_gone == false){ 
             float a = agent.m_x - m_x;
@@ -264,11 +295,59 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
 
     //If agent has no goal yet...set a goal to an undiscovered floor tile
     if ((m_goalX == -1 && m_goalY == -1) || m_aimless == true){
+
+        //////////////////////////////////////
+        //calculate team statistics
+        //////////////////////////////////////
+        
+        // dictionary of <team, mean team likeablness for this agent>
+        std::map<int,float> allMeanTeamLikableness;
+        // dictionary of <team, highest team likableness value for this agent>
+        std::map<int,int> allHighestTeamLikablenessValues;
+        // dictionary of <team, team sizes>
+        std::map<int,int> allTeamSizes;
+
+        for(Agent& agent: agents)
+        {
+            if(agent.m_id != m_id && agent.m_team != NO_TEAM)
+            {
+                // initialize dicstionary if not
+                if(allHighestTeamLikablenessValues.count(agent.m_team))
+                {
+                    allHighestTeamLikablenessValues[agent.m_team] = 0;
+                }
+                // initialize dicstionary if not
+                if(allMeanTeamLikableness.count(agent.m_team))
+                {
+                    allMeanTeamLikableness[agent.m_team] = 0;
+                }
+                // initialize dicstionary if not
+                if(allTeamSizes.count(agent.m_team))
+                {
+                    allTeamSizes[agent.m_team] = 0;
+                }
+
+                if(m_likableness[agent.m_id] > allHighestTeamLikablenessValues[agent.m_team])
+                    allHighestTeamLikablenessValues[agent.m_team] = m_likableness[agent.m_id];
+
+                allMeanTeamLikableness[agent.m_team] += m_likableness[agent.m_id];
+                allTeamSizes[agent.m_team] += 1;
+            }
+        }
+
+        // calculate mean values
+        for(auto it : allTeamSizes)
+        {
+            if(it.second != 0)
+                allMeanTeamLikableness[it.first] /= it.second;
+        }
+
         //Look through all tiles in map that match certain criteria
         int check_t = 0; //Count treasure tiles
         int check_d = 0; //Count tiles to discover
         int check_m = 0; //Count agents with treasures in order to mug
         int check_s = 0; //Count agents in traps to save
+        int check_j = 0; //Count agents to join a team with
 
         for (int x = 0; x < sizex; x++){
             for (int y = 0; y < sizey; y++){
@@ -276,47 +355,62 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                 //Various conditions to search for
                 if (m_map.onTop[y][x] == TreasureTile && m_map.discovered[y][x] > .8) check_t++;
                 if (isTileOccupiable(x, y, m_map) && m_map.discovered[y][x] < .8) check_d++;
-            
-                for (Agent& agent: agents){
-                    float a = agent.m_x - m_x;
-                    float b = agent.m_y - m_y;
-                    float c = sqrt(a*a + b*b);
-                    int same_team = 1; //Agents less likely to steal from own team
-                    if (agent.m_team == m_team) same_team = SAME_TEAM_BONUS; 
-
-                    //CHECK IF AGENT WORTH MUGGING
-                    if(agent.m_health > 0 
-                        //If prefer not to check for 2 agents treasure difference...
-                        && agent.m_treasureCount > (MUG_THRESHOLD*same_team) 
-                        // && agent.m_treasureCount-m_treasureCount > (MUG_THRESHOLD*same_team) 
-                        && m_id != agent.m_id 
-                        && m_targetId == -1
-                        && c <= NOTICE_AGENTS_DISTANCE) 
-
-                        check_m++;
-
-                    //CHECK IF AGENT WORTH SAVING
-                    if(agent.m_health > 0 
-                        && agent.m_stuck == true 
-                        && m_id != agent.m_id 
-                        && m_targetId == -1) 
-
-                        check_s++;
-                }
-
-
             }
         }
+            
+        for (Agent& agent: agents){
+            float a = agent.m_x - m_x;
+            float b = agent.m_y - m_y;
+            float c = sqrt(a*a + b*b);
+            int same_team = 1; //Agents less likely to steal from own team
+            if (agent.m_team == m_team && m_team != NO_TEAM) same_team = SAME_TEAM_BONUS; 
+
+            //CHECK IF AGENT WORTH MUGGING
+            if(agent.m_health > 0 
+                    && m_id != agent.m_id 
+                    && m_targetId == -1
+                    && c <= NOTICE_AGENTS_DISTANCE
+                    //&& (
+                    //    (
+                           //If prefer not to check for 2 agents treasure difference...
+                           //&& agent.m_treasureCount > (MUG_THRESHOLD*same_team) 
+                    //     agent.m_treasureCount-m_treasureCount > (steal_treasure*same_team) 
+                    && m_likableness[agent.m_id] <= LIKABLENESS_MUG_THRESHOLD
+                    //    )
+                    //    || m_likableness[agent.m_id] <= LIKABLENESS_MUG_THRESHOLD/2
+                    //   )
+              )
+                check_m++;
+
+            //CHECK IF AGENT WORTH SAVING
+            if(agent.m_health > 0 
+                    && agent.m_stuck == true 
+                    && m_id != agent.m_id 
+                    && m_targetId == -1
+                    && m_likableness[agent.m_id] >= LIKABLENESS_SAVE_THRESHOLD)
+                check_s++;
+
+            if(agent.m_health > 0 
+                    && m_id != agent.m_id 
+                    && m_targetId == -1
+                    && c <= notice_agents
+                    && (m_team != agent.m_team || m_team == NO_TEAM)
+                    && isWillingToChangeToAgentsTeams(agent, allMeanTeamLikableness, allHighestTeamLikablenessValues))
+                check_j++;
+        }
+
+
 
         //Agents will explore by default. But will seek Treasure if any treasure lies in their discovered m_map array.
         std::string      agent_top_want = "Explore";
+        if (check_j > 0) agent_top_want = "Join";
         if (check_t > 0) agent_top_want = "Treasure";
         if (check_m > 0) agent_top_want = "Mug";
         if (check_s > 0) agent_top_want = "Save";
 
-        if (check_t > 0 || check_d > 0 || check_m > 0 || check_s > 0){
-            int r_t = 0; int r_d = 0; int r_m = 0; int r_s = 0;
-            
+        if (check_t > 0 || check_d > 0 || check_m > 0 || check_s > 0 ){//|| check_j > 0){
+            int r_t = 0; int r_d = 0; int r_m = 0; int r_s = 0; int r_j = 0;
+
             if (check_t > 0){
                 r_t = rand()%check_t; check_t = 0;
             }
@@ -328,6 +422,9 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
             }
             if (check_s > 0){
                 r_s = rand()%check_s; check_s = 0;
+            }
+            if (check_j > 0){
+                r_j = rand()%check_j; check_j = 0;
             }
 
             for (int x = 0; x < sizex; x++){
@@ -351,42 +448,60 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                         }
                         check_d++;
                     }
-                    for (Agent& agent: agents){
+                }
+            }
+            for (Agent& agent: agents){
 
-                        float a = agent.m_x - m_x;
-                        float b = agent.m_y - m_y;
-                        float c = sqrt(a*a + b*b);
-                        int same_team = 1;
-                        if (agent.m_team == m_team) same_team = SAME_TEAM_BONUS;
+                float a = agent.m_x - m_x;
+                float b = agent.m_y - m_y;
+                float c = sqrt(a*a + b*b);
+                int same_team = 1;
+                if (agent.m_team == m_team && m_team != NO_TEAM) same_team = 3;
 
-                        //CHECK IF AGENT WORTH MUGGING (AGAIN)
-                        if(agent_top_want == "Mug" 
-                            && agent.m_health > 0 
-                            //If prefer not to check for 2 agents treasure difference...
-                            && agent.m_treasureCount > (MUG_THRESHOLD*same_team) 
-                            // && agent.m_treasureCount-m_treasureCount > (MUG_THRESHOLD*same_team) 
-                            && m_id != agent.m_id && m_targetId == -1
-                            && c <= NOTICE_AGENTS_DISTANCE){
+                if(agent_top_want == "Mug" && agent.m_health > 0 
+                        && m_id != agent.m_id && m_targetId == -1
+                        && c <= NOTICE_AGENTS_DISTANCE
+                        //&& (
+                        //    (
+                               //If prefer not to check for 2 agents treasure difference...
+                               //&& agent.m_treasureCount > (MUG_THRESHOLD*same_team) 
+                        //     agent.m_treasureCount-m_treasureCount > (steal_treasure*same_team) 
+                        && m_likableness[agent.m_id] <= LIKABLENESS_MUG_THRESHOLD
+                        //    )
+                        //    || m_likableness[agent.m_id] <= LIKABLENESS_MUG_THRESHOLD/2
+                        //   )
+                  )
+                {
 
-                            if (r_m == check_m){
-                                m_targetId = agent.m_id;
-                                m_desireToMug = true;
-                            }
-                            check_m++;
-                        }
-                        //CHECK IF AGENT WORTH SAVING (AGAIN)
-                        if(agent_top_want == "Save" 
-                            && agent.m_health > 0 
-                            && agent.m_stuck == true 
-                            && m_id != agent.m_id && m_targetId == -1){
-
-                            if (r_s == check_s){
-                                m_targetId = agent.m_id;
-                            }
-                            check_s++;
-                        }
+                    if (r_m == check_m){
+                        m_targetId = agent.m_id;
+                        m_desireToMug = true;
                     }
-                    
+                    check_m++;
+                }
+                if(agent_top_want == "Save" && agent.m_health > 0 
+                        && agent.m_stuck == true 
+                        && m_id != agent.m_id && m_targetId == -1
+                        && m_likableness[agent.m_id] >= LIKABLENESS_SAVE_THRESHOLD)
+                {
+
+                    if (r_s == check_s){
+                        m_targetId = agent.m_id;
+                    }
+                    check_s++;
+                }
+                if(agent_top_want == "Join" && agent.m_health > 0 
+                        && m_id != agent.m_id 
+                        && m_targetId == -1
+                        && c <= notice_agents
+                        && (m_team != agent.m_team || m_team == NO_TEAM)
+                        && isWillingToChangeToAgentsTeams(agent, allMeanTeamLikableness, allHighestTeamLikablenessValues))
+                {
+                    if (r_j == check_j)
+                    {
+                        joinAgentsTeam(agent);
+                    }
+                    check_j++;
 
                 }
             }
@@ -417,14 +532,28 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                     if (agent.m_treasureCount > 0){ // && m_likableness[m_targetId] < 0){
                         agent.m_treasureCount -= 1;
                         agent.m_health -= 1;
+                        agent.m_likableness[m_id] -= MUGGING_LIKABLENESS_REDUCTION;
+                        // if agent is on a team, then all of their team members will dislike current agent
+                        if(agent.m_team != NO_TEAM)
+                        {
+                            for(Agent& teammate : agents)
+                            {
+                                if(agent.m_team == teammate.m_team && m_id != teammate.m_id)
+                                {
+                                    teammate.m_likableness[m_id] -= MUGGING_LIKABLENESS_REDUCTION / 2;
+
+                                }
+                            }
+                        }
                         agent.m_hurt = 10; //Font will appear red for 10 time steps
                         if (m_team == agent.m_team) 
-                            m_team = rand()%1000; //Attacking agent takes new team if both on same team
+                            m_team = NO_TEAM; //rand()%1000; //Attacking agent takes new team if both on same team
 
                         m_treasureCount += 1;
                         m_targetId = -1;
                         m_aimless = true;
                         m_desireToMug = false;
+                        m_likableness[agent.m_id] -= 1;
                     }
                 }
             }
@@ -449,7 +578,25 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                     agent.m_stuck = false;
                     agent.m_x = m_x;
                     agent.m_y = m_y;
-                    agent.m_team = m_team; //Bring over to new team if saved
+                    agent.joinAgentsTeam(*this); //Bring over to new team if saved
+                    // the saved person likes this agent more
+                    agent.m_likableness[m_id] += SAVING_LIKABLENESS_ADDITION;
+                    for(Agent& teammate : agents)
+                    {
+                        if(teammate.m_team == agent.m_team)
+                        {
+                            if(m_id != teammate.m_id)
+                            {
+                                // teamates slightly like the person who saves other agents
+                                teammate.m_likableness[m_id] += SAVING_LIKABLENESS_ADDITION/4;
+                            }
+                            if(agent.m_id != teammate.m_id)
+                            {
+                                // the agent who was just saved slightly likes their new teamates
+                                agent.m_likableness[teammate.m_id] += SAVING_LIKABLENESS_ADDITION/4;
+                            }
+                        }
+                    }
 
                     m_targetId = -1;
                     m_aimless = true;

@@ -26,8 +26,9 @@ void Auction::giveWinTo(int agent_index)
 
 void Auction::step()
 {
-    m_askingPrice += 5;
-    giveWinTo(m_agentsInAuction[0]);
+    m_askingPrice += 10;
+    int winner = rand() % m_agentsInAuction.size();
+    giveWinTo(m_agentsInAuction[winner]);
 
     m_isOver = true;
 
