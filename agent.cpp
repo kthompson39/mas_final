@@ -34,7 +34,7 @@ bool Agent::isWillingToChangeToAgentsTeams(Agent& agent, std::map<int,float> all
     if(agent.m_team == NO_TEAM || agent.m_id == m_id)
         return false;
 
-    if(m_likableness[agent.m_id] > JOIN_TEAM_THREASHOLD
+    if(m_likableness[agent.m_id] > JOIN_TEAM_THRESHOLD
        && m_likableness[agent.m_id] > allHighestTeamLikablenessValues[m_team] 
        && allMeanTeamLikableness[agent.m_team] > allMeanTeamLikableness[m_team]
       )
@@ -265,9 +265,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
         }
     }
 
-    int steal_treasure = 4; //agents mug after this many treasures
-    int notice_agents = 2; //radius from which to notice other agents
-    int team_distance = 5; //radius by which teams must stay together
+    //int steal_treasure = 4; //agents mug after this many treasures
 
     for (Agent& agent: agents){ //If target agent is dead, find new goal
         if (agent.m_id == m_targetId && agent.m_health <= 0){
@@ -393,7 +391,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
             if(agent.m_health > 0 
                     && m_id != agent.m_id 
                     && m_targetId == -1
-                    && c <= notice_agents
+                    && c <= NOTICE_AGENTS_DISTANCE
                     && (m_team != agent.m_team || m_team == NO_TEAM)
                     && isWillingToChangeToAgentsTeams(agent, allMeanTeamLikableness, allHighestTeamLikablenessValues))
                 check_j++;
@@ -493,7 +491,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                 if(agent_top_want == "Join" && agent.m_health > 0 
                         && m_id != agent.m_id 
                         && m_targetId == -1
-                        && c <= notice_agents
+                        && c <= NOTICE_AGENTS_DISTANCE
                         && (m_team != agent.m_team || m_team == NO_TEAM)
                         && isWillingToChangeToAgentsTeams(agent, allMeanTeamLikableness, allHighestTeamLikablenessValues))
                 {
