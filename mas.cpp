@@ -65,6 +65,21 @@ int main(int argc, char *argv[]){
 
             turns++;
 
+            if(turns % 75 == 0)
+            {
+                for(Agent& agent: agents)
+                {
+                    for(Agent& opponent: agents)
+                    {
+                        //if((agent.m_team != opponent.m_team || agent.m_team == NO_TEAM) && agent.m_id != opponent.m_id)
+                        if(agent.m_id != opponent.m_id)
+                        {
+                            agent.m_likableness[opponent.m_id] -= 1;
+                        }
+                    }
+                }
+            }
+
             for (Agent& agent: agents)
             {
                 agent.step(agents, map);
