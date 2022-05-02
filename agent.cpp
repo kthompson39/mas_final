@@ -246,7 +246,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
     //    m_collectStep = -1;
     //}
 
-    if (m_goalX == 1 && m_goalY == 1 && m_x <= 1 && m_y <= 1){
+    if (m_goalX == 1 && m_goalY == 1 && (m_x <= 1 || m_y <= 1)){
         m_gone = true;
         return;
     }
@@ -528,8 +528,6 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                 || (m_x-1 == m_goalX && m_y-1 == m_goalY) ){
 
                     if (agent.m_treasureCount > 0){ // && m_likableness[m_targetId] < 0){
-                        agent.m_treasureCount -= 1;
-                        agent.m_health -= 1;
                         agent.m_likableness[m_id] -= MUGGING_LIKABLENESS_REDUCTION;
                         // if agent is on a team, then all of their team members will dislike current agent
                         if(agent.m_team != NO_TEAM)
@@ -543,15 +541,21 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                                 }
                             }
                         }
-                        agent.m_hurt = 10; //Font will appear red for 10 time steps
                         if (m_team == agent.m_team) 
                             m_team = NO_TEAM; //rand()%1000; //Attacking agent takes new team if both on same team
 
-                        m_treasureCount += 1;
+                        m_treasureCount += 5;
                         m_targetId = -1;
                         m_aimless = true;
                         m_desireToMug = false;
                         m_likableness[agent.m_id] -= 1;
+
+                        agent.m_treasureCount -= 5;
+                        agent.m_health -= 1;
+                        agent.m_hurt = 10; //Font will appear red for 10 time steps
+                        agent.m_aimless = true;
+                        agent.m_goalX = agent.m_x; 
+                        agent.m_goalY = agent.m_y;
                     }
                 }
             }

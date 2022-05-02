@@ -65,14 +65,14 @@ int main(int argc, char *argv[]){
 
             turns++;
 
-            if(turns % 75 == 0)
+            if(turns % AUTO_DECREASE == 0)
             {
                 for(Agent& agent: agents)
                 {
                     for(Agent& opponent: agents)
                     {
                         //if((agent.m_team != opponent.m_team || agent.m_team == NO_TEAM) && agent.m_id != opponent.m_id)
-                        if(agent.m_id != opponent.m_id)
+                        if(agent.m_id != opponent.m_id && (opponent.m_team == -2 || agent.m_team != opponent.m_team))
                         {
                             agent.m_likableness[opponent.m_id] -= 1;
                         }
@@ -170,6 +170,7 @@ int main(int argc, char *argv[]){
 
                         // update map
                         map.onTop[treasure.y][treasure.x] = None;
+
                         // map.word[treasure.y][treasure.x] = "  ";
                         updateTileColor(map, none_toggle, treasure.y, treasure.x);
                     }

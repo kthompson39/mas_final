@@ -10,15 +10,16 @@ static const int INITIAL_AGENT_HEALTH_VALUE = 80;
 static const int TRAP_DAMAGE_PER_TICK = 1;
 
 static const int MUG_THRESHOLD = 5;
-static const int NOTICE_AGENTS_DISTANCE = 5; //used only for mugging, not saving (there is infinite distance to save)
+static const int NOTICE_AGENTS_DISTANCE = 25; //used only for mugging, not saving (there is infinite distance to save)
 static const int TEAM_CLOSENESS = 4; //radius by which agents in team realize they are too far and should get closer to each other
 static const int SAME_TEAM_BONUS = 5; //If very high, teams will never mug each other
 
-static const int LIKABLENESS_MUG_THRESHOLD = 30;
+static const int LIKABLENESS_MUG_THRESHOLD = 40;
 static const int LIKABLENESS_SAVE_THRESHOLD = LIKABLENESS_MUG_THRESHOLD + 5;
-static const int MUGGING_LIKABLENESS_REDUCTION = 5;
+static const int MUGGING_LIKABLENESS_REDUCTION = 10;
 static const int SAVING_LIKABLENESS_ADDITION = 20;
-static const int JOIN_TEAM_THRESHOLD = INITIAL_LIKABLENESS_VALUE + 30;
+static const int JOIN_TEAM_THRESHOLD = INITIAL_LIKABLENESS_VALUE + 20;
+static const int AUTO_DECREASE = 7500;
 
 static const int NO_TEAM = -2;
 
