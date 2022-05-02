@@ -19,7 +19,7 @@ static const int LIKABLENESS_SAVE_THRESHOLD = LIKABLENESS_MUG_THRESHOLD + 5;
 static const int MUGGING_LIKABLENESS_REDUCTION = 10;
 static const int SAVING_LIKABLENESS_ADDITION = 20;
 static const int JOIN_TEAM_THRESHOLD = INITIAL_LIKABLENESS_VALUE + 20;
-static const int AUTO_DECREASE = 7500;
+static const int AUTO_DECREASE = 50;
 
 static const int NO_TEAM = -2;
 
