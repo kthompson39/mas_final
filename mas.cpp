@@ -399,7 +399,7 @@ int main(int argc, char *argv[]){
                 }
             }
 
-            // printf("\nLikableness values of agents:\n");
+            printf("\nLikableness values of agents:\n");
             // table header
             int win_like = 0;
             int win_team_count = 0;
@@ -431,7 +431,7 @@ int main(int argc, char *argv[]){
                 printf("|\n");
             }
 
-            // printf("\nTeam history of agents:\n");
+            printf("\nTeam history of agents:\n");
             // table header
             printf("Agent |\n");
             for (Agent& agent: agents)
