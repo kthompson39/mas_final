@@ -230,6 +230,14 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
             BFS_to_Undiscovered(m_y, m_x, true);
             m_treasureCount--;
         }
+        if (m_deathBy == -1){
+            if (m_stuck == true){
+                m_stuck = false;
+                m_deathBy = 1;
+            }else{
+                m_deathBy = 0;
+            }
+        }
     }
 
     if(m_stuck || m_inAuction || m_health <= 0 || m_gone)

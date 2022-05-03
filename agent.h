@@ -41,6 +41,7 @@ public:
     int m_id = -1;
     int m_targetId = -1;
     bool m_desireToMug = false;
+    int m_deathBy = -1; //-1 if not dead. 0 is trap, 1 is mug
 
     std::vector<int> m_teamHistory;
 };

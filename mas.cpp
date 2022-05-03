@@ -387,18 +387,19 @@ int main(int argc, char *argv[]){
             system("clear");
             int win = -1;
             int winner = -1;
-            printf("%-8s | %-5s | %-10s | %-5s (%d) \n", "Agent ID", "Team", "Treasures", "Health", INITIAL_AGENT_HEALTH_VALUE);
+            printf("%-8s | %-5s | %-10s | %-5s (%d) | %s \n", "Agent ID", "Team", "Treasures", "Health", INITIAL_AGENT_HEALTH_VALUE, "Death(0 Mug, 1 Trap)");
             for (Agent& agent: agents)
             {
                 if (agent.m_health < 0) agent.m_health = 0; //Prevent negative health
-                printf("%-8d | %-5d | %-10d | %-5d \n", agent.m_id, agent.m_team, agent.m_treasureCount, agent.m_health);
+                if (agent.m_health <= 0 && agent.m_stuck == true) agent.m_deathBy  = 1; //Last agent MUST have died to trap
+                printf("%-8d | %-5d | %-10d | %-5d       | %d \n", agent.m_id, agent.m_team, agent.m_treasureCount, agent.m_health, agent.m_deathBy);
                 if (agent.m_treasureCount > win){
                     win = agent.m_treasureCount;
                     winner = agent.m_id;
                 }
             }
 
-            printf("\nLikableness values of agents:\n");
+            // printf("\nLikableness values of agents:\n");
             // table header
             int win_like = 0;
             int win_team_count = 0;
@@ -430,7 +431,7 @@ int main(int argc, char *argv[]){
                 printf("|\n");
             }
 
-            printf("\nTeam history of agents:\n");
+            // printf("\nTeam history of agents:\n");
             // table header
             printf("Agent |\n");
             for (Agent& agent: agents)
