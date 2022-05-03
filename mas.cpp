@@ -397,10 +397,18 @@ int main(int argc, char *argv[]){
                     winner = agent.m_id;
                 }
             }
+            printf("\nLikableness values of agents:\n");
             for (Agent& agent: agents)
             {
                 for(size_t i = 0; i < agent.m_likableness.size(); i++)
-                    printf("|%-3d ", agent.m_likableness[i]);
+                    printf("|%-3ld ", agent.m_likableness[i]);
+                printf("|\n");
+            }
+            printf("\nTeam history of agents:\n");
+            for (Agent& agent: agents)
+            {
+                for(size_t i = 0; i < agent.m_teamHistory.size(); i++)
+                    printf("|%-3d ", agent.m_teamHistory[i]);
                 printf("|\n");
             }
             printf("\nWinner: %d \n", winner);

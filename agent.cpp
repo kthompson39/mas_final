@@ -6,7 +6,7 @@
 
 Agent::Agent(int startX, int startY, int numOtherAgents, Map& map, int id) :
     m_x(startX), m_y(startY), m_likableness(std::vector<long int>(numOtherAgents, INITIAL_LIKABLENESS_VALUE)), 
-    m_map(Map(map)), m_global_map(map), m_id(id)
+    m_map(Map(map)), m_global_map(map), m_id(id), m_teamHistory(std::vector<int>())
 {
 }
 
@@ -25,7 +25,6 @@ void Agent::leaveAuction()
 
 bool Agent::bid(int askingPrice, std::vector<int> agentsInAuction)
 {
-    //TODO implement agent bidding in auctions
     return rand()%2;
 }
 
@@ -47,7 +46,7 @@ bool Agent::isWillingToChangeToAgentsTeams(Agent& agent, std::map<int,float> all
 
 int Agent::updateInternalMap(Map& fullMap)
 {
-    float brightness = 8; // ????
+    float brightness = 8;
     int min_x = std::max(m_x - 7, 0);
     int min_y = std::max(m_y - 7, 0);
 
@@ -206,9 +205,11 @@ void Agent::joinAgentsTeam(Agent& agent)
     if(agent.m_team == NO_TEAM)
     {
         agent.m_team = rand()%1000;
+        agent.m_teamHistory.push_back(agent.m_team);
     }
 
     m_team = agent.m_team;
+    m_teamHistory.push_back(m_team);
 }
 
 void Agent::step(std::vector<Agent>& agents, Map& map)
@@ -220,6 +221,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
         m_team = (m_id % 2)+5; //initialize with 2 teams. +5 so color begins at yellow
         m_team = m_id;
         // m_team = 5; 
+        m_teamHistory.push_back(m_team);
     }
 
     if(m_health <= 0)
@@ -549,7 +551,10 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                             }
                         }
                         if (m_team == agent.m_team) 
+                        {
                             m_team = NO_TEAM; //rand()%1000; //Attacking agent takes new team if both on same team
+                            m_teamHistory.push_back(m_team);
+                        }
 
                         m_treasureCount += 1;
                         m_targetId = -1;

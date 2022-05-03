@@ -41,4 +41,6 @@ public:
     int m_id = -1;
     int m_targetId = -1;
     bool m_desireToMug = false;
+
+    std::vector<int> m_teamHistory;
 };
