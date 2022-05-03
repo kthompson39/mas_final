@@ -217,7 +217,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
 
     if(m_team == -1) //agent currently has no team
     {
-        // m_team = (m_id % 2)+5; //initialize with 2 teams. +5 so color begins at yellow
+        m_team = (m_id % 2)+5; //initialize with 2 teams. +5 so color begins at yellow
         m_team = m_id;
         // m_team = 5; 
     }
@@ -246,7 +246,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
     //    m_collectStep = -1;
     //}
 
-    if (m_goalX == 1 && m_goalY == 1 && (m_x <= 1 || m_y <= 1)){
+    if ((m_x <= 0 || m_y <= 0)){
         m_gone = true;
         return;
     }
@@ -261,7 +261,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
         else
         {
             m_aimless = true; //Agent no longer has a goal
-            m_desireToMug = false; //Agent no longer attempting to mug someone
+            // m_desireToMug = false; //Agent no longer attempting to mug someone
         }
     }
 
@@ -274,10 +274,16 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
             m_targetId = -1;
         }
 
+        if (agent.m_id == m_targetId && agent.m_health > 0){
+            m_goalX = agent.m_x;
+            m_goalY = agent.m_y;
+        }
+
         //ensure teams are close
         if (agent.m_team == m_team && m_team != NO_TEAM && agent.m_health > 0 
             && agent.m_id != m_id && agent.m_stuck == false
-            && agent.m_id < m_id && agent.m_gone == false){ 
+            && agent.m_id < m_id && agent.m_gone == false
+            && agent.m_gone == false){ 
             float a = agent.m_x - m_x;
             float b = agent.m_y - m_y;
             float c = sqrt(a*a + b*b);
@@ -290,6 +296,7 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
             }
         }
     }
+
 
     //If agent has no goal yet...set a goal to an undiscovered floor tile
     if ((m_goalX == -1 && m_goalY == -1) || m_aimless == true){
@@ -504,8 +511,8 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                 }
             }
         }else{
-            m_goalX = 1; //If no objectives remain, head to top left corner
-            m_goalY = 1;
+            m_goalX = 0; //If no objectives remain, head to top left corner
+            m_goalY = 0;
         }
     }
 
@@ -544,18 +551,20 @@ void Agent::step(std::vector<Agent>& agents, Map& map)
                         if (m_team == agent.m_team) 
                             m_team = NO_TEAM; //rand()%1000; //Attacking agent takes new team if both on same team
 
-                        m_treasureCount += 5;
+                        m_treasureCount += 1;
                         m_targetId = -1;
                         m_aimless = true;
                         m_desireToMug = false;
                         m_likableness[agent.m_id] -= 1;
 
-                        agent.m_treasureCount -= 5;
-                        agent.m_health -= 1;
+                        agent.m_treasureCount -= 1;
+                        agent.m_health -= 10;
                         agent.m_hurt = 10; //Font will appear red for 10 time steps
                         agent.m_aimless = true;
-                        agent.m_goalX = agent.m_x; 
-                        agent.m_goalY = agent.m_y;
+                        // agent.m_goalX = agent.m_x; 
+                        // agent.m_goalY = agent.m_y;
+                        // agent.m_targetId = m_id;
+                        // agent.m_desireToMug = true;
                     }
                 }
             }
