@@ -20,7 +20,17 @@ bool stop_program = false;
 
 int main(int argc, char *argv[]){
 
-    srand(time(0));
+    //srand(time(0));
+    long int seed;
+    seed = time(0);
+    //seed = 1651711755; //low death: 1 trap death. good team dispersment
+    //seed = 1651710710; //moderate death: 1 mugging, 4 traps. some large teams, some small teams. all around good
+    //seed = 1651710870; //low death: 2 muggings. Well disperesed teams
+    //seed = 1651711404; //moderate-high death: 5 mugs, 2 traps. little chaotic
+    //seed = 1651711500; //high death: 7 mugs, 1 trap. lots of chaos
+    //seed = 1651711692; //high death: 1 survivor
+    //seed = 1651712717; //everyone dies
+    srand(seed);
 
     WINDOW* win = stdscr;
     bool show_all_map = false;
@@ -450,6 +460,7 @@ int main(int argc, char *argv[]){
             printf("\nWinner Liked: %d", win_like);
             printf("\nWin Team Count: %d ", win_team_count);
             printf("\nWin Team Changes: %d \n", win_change_team);
+            printf("\nseed: %ld \n", seed);
             break;
         }
 
