@@ -64,7 +64,7 @@ int main(int argc, char *argv[]){
     {
         Map map(original_map);
         genColors(map, none_toggle);
-        auto agents = createAgents(12, 1,1, map);
+        auto agents = createAgents(AGENT_COUNT, 1,1, map);
 
         // holds current, ongoing auctions
         std::list<Auction> auctions;

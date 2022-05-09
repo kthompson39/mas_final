@@ -44,8 +44,9 @@ Once the program finishes, details and statistics of the run will be output. Thi
 
 ## Adjusting Settings
 
-All settings that can be modified are in `definitions.h`, except for changing the seed. That is done at the
-top of main in `mas.cpp`.
+All settings that can be modified are in `definitions.h`, except for changing the seed and 
+setting the map size. Setting the seed is done at the top of main in `mas.cpp`. Setting the
+map size is done in `map.h`.
 
 
 

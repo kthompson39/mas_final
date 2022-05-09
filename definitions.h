@@ -2,6 +2,7 @@
 
 enum Direction {LEFT, RIGHT, UP, DOWN, UP_RIGHT, UP_LEFT, DOWN_RIGHT, DOWN_LEFT, STAY};
 
+static const int AGENT_COUNT = 12;
 static const int MAX_TRAPS_PER_ROOM = 3;
 static const int MAX_TREASURES_PER_ROOM = 8;
 static const int TREASURE_COLLECTION_TIME = 10;
